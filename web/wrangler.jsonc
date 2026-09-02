@@ -1,0 +1,11 @@
+{
+  // Deploy do painel (SPA estática) como Cloudflare Worker com static assets.
+  // Build: `npm run build` gera ./dist ; deploy: `npx wrangler deploy`.
+  "name": "agrun-analtycs-panel",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "./dist",
+    // qualquer rota não encontrada cai no index.html (roteamento do React Router)
+    "not_found_handling": "single-page-application"
+  }
+}
