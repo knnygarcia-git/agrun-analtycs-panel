@@ -68,6 +68,7 @@ export const en: Record<keyof typeof pt, string> = {
   "aluno.colStructure": "Structure",
   "aluno.colExecution": "Execution",
   "aluno.importFitShort": "import .FIT",
+  "aluno.reviewed": "reviewed",
 
   // new athlete
   "novoAluno.title": "New athlete",
@@ -283,6 +284,12 @@ export const en: Record<keyof typeof pt, string> = {
   "treino.matchAuto": "Automatic",
   "treino.matchManual": "Manual",
   "treino.matchReview": "To review",
+  "treino.reviewed": "Reviewed",
+  "treino.reviewedYesSent": "Yes (feedback sent)",
+  "treino.reviewedYesManual": "Yes",
+  "treino.reviewedNo": "No",
+  "treino.markReviewed": "Mark as reviewed",
+  "treino.unmarkReviewed": "Unmark reviewed",
   "treino.paceHrTitle": "Pace and heart rate",
   "treino.chartReprocessError":
     "Could not reprocess the chart for this file ({msg}). The per-stage table below is still valid.",

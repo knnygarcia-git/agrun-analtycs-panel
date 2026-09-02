@@ -69,6 +69,7 @@ export const pt = {
   "aluno.colStructure": "Estrutura",
   "aluno.colExecution": "Execução",
   "aluno.importFitShort": "importar .FIT",
+  "aluno.reviewed": "avaliado",
 
   // novo aluno
   "novoAluno.title": "Novo aluno",
@@ -284,6 +285,12 @@ export const pt = {
   "treino.matchAuto": "Automático",
   "treino.matchManual": "Manual",
   "treino.matchReview": "A revisar",
+  "treino.reviewed": "Avaliado",
+  "treino.reviewedYesSent": "Sim (feedback enviado)",
+  "treino.reviewedYesManual": "Sim",
+  "treino.reviewedNo": "Não",
+  "treino.markReviewed": "Marcar como avaliado",
+  "treino.unmarkReviewed": "Desmarcar avaliado",
   "treino.paceHrTitle": "Ritmo e frequência cardíaca",
   "treino.chartReprocessError":
     "Não consegui reprocessar o gráfico deste arquivo ({msg}). A tabela por etapa abaixo continua válida.",

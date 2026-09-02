@@ -229,6 +229,17 @@
   border-color: #5a6b96;
   color: var(--text);
 }
+/* toggle ligado (ex.: "avaliado") */
+.btn-ghost.is-on {
+  border-color: var(--z2);
+  color: var(--z2);
+  background: rgba(53, 183, 160, 0.1);
+}
+.btn-ghost.is-on:hover {
+  background: rgba(53, 183, 160, 0.16);
+  border-color: var(--z2);
+  color: var(--z2);
+}
 /* ação destrutiva: neutra, vira vermelho ao passar o mouse */
 .btn-danger {
   background: transparent;
@@ -597,6 +608,19 @@ table.conf tr.sev-erro td {
 }
 table.conf tr.sev-aviso td {
   background: rgba(232, 197, 71, 0.06);
+}
+/* treino já avaliado pelo coach (marca manual OU feedback enviado) — vence o sev-* */
+table.conf tbody tr.tr-avaliado td,
+table.conf tr.tr-avaliado td {
+  background: rgba(53, 183, 160, 0.1);
+  box-shadow: inset 3px 0 0 var(--z2);
+}
+table.conf tbody tr.tr-avaliado:hover td {
+  background: rgba(53, 183, 160, 0.16);
+}
+.wk-check {
+  color: var(--z2);
+  font-weight: 700;
 }
 .sev-tag {
   font-family: var(--font-head);

@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { Voltar } from "@/components/Voltar";
-import type { Ciclo, TreinoExecutado, TreinoPlanejado, Zona } from "@/types/database";
+import type {
+  Ciclo,
+  FeedbackStatus,
+  TreinoExecutado,
+  TreinoPlanejado,
+  Zona,
+} from "@/types/database";
 import { fmtSec } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { faixasDeZonas } from "@/lib/fit/zones";
@@ -24,6 +30,16 @@ const COR_ZONA: Record<string, string> = {
 
 interface ExecComPlano extends TreinoExecutado {
   treino_planejado: (TreinoPlanejado & { ciclo: Ciclo }) | null;
+  feedback:
+    | { status: FeedbackStatus }
+    | { status: FeedbackStatus }[]
+    | null;
+}
+
+function fbStatusDe(e: ExecComPlano | null): FeedbackStatus | null {
+  const f = e?.feedback;
+  if (!f) return null;
+  return (Array.isArray(f) ? f[0]?.status : f.status) ?? null;
 }
 
 export function TreinoDetalhePage() {
@@ -54,12 +70,28 @@ export function TreinoDetalhePage() {
     navigate(`/aluno/${alunoId}?ciclo=${exec.treino_planejado?.ciclo_id ?? ""}`);
   }
 
+  async function alternarAvaliado() {
+    if (!exec) return;
+    const novo = exec.avaliado_em ? null : new Date().toISOString();
+    const { error } = await supabase
+      .from("treino_executado")
+      .update({ avaliado_em: novo })
+      .eq("id", exec.id);
+    if (error) {
+      setErro(error.message);
+      return;
+    }
+    setExec({ ...exec, avaliado_em: novo });
+  }
+
   useEffect(() => {
     if (!execId) return;
     setCarregando(true);
     supabase
       .from("treino_executado")
-      .select("*, treino_planejado:treino_planejado(*, ciclo:ciclo(*))")
+      .select(
+        "*, treino_planejado:treino_planejado(*, ciclo:ciclo(*)), feedback(status)",
+      )
       .eq("id", execId)
       .single()
       .then(async ({ data, error }) => {
@@ -110,6 +142,9 @@ export function TreinoDetalhePage() {
       : null;
   const faixas = faixasDeZonas(zonas);
 
+  const feedbackEnviado = fbStatusDe(exec) === "enviado";
+  const avaliado = exec.avaliado_em != null || feedbackEnviado;
+
   return (
     <div className="pagina-larga">
       <Voltar to={`/aluno/${alunoId}?ciclo=${plano?.ciclo_id ?? ""}`}>
@@ -126,6 +161,16 @@ export function TreinoDetalhePage() {
           </div>
         </div>
         <div className="header-acoes">
+          {!feedbackEnviado && (
+            <button
+              className={`btn btn-ghost${exec.avaliado_em ? " is-on" : ""}`}
+              onClick={alternarAvaliado}
+            >
+              {exec.avaliado_em
+                ? `✓ ${t("treino.unmarkReviewed")}`
+                : t("treino.markReviewed")}
+            </button>
+          )}
           <button className="btn btn-danger" onClick={removerExecucao}>
             {t("treino.removeExecution")}
           </button>
@@ -158,6 +203,19 @@ export function TreinoDetalhePage() {
               : exec.status_match === "confirmado_manual"
                 ? t("treino.matchManual")
                 : t("treino.matchReview")}
+          </div>
+        </div>
+        <div className="item">
+          <div className="label">{t("treino.reviewed")}</div>
+          <div
+            className="value"
+            style={avaliado ? { color: "var(--z2)" } : undefined}
+          >
+            {feedbackEnviado
+              ? t("treino.reviewedYesSent")
+              : exec.avaliado_em
+                ? t("treino.reviewedYesManual")
+                : t("treino.reviewedNo")}
           </div>
         </div>
       </div>

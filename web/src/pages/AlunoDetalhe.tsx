@@ -4,12 +4,31 @@ import { supabase } from "@/lib/supabase";
 import type {
   Aluno,
   Ciclo,
+  FeedbackStatus,
   TreinoExecutado,
   TreinoPlanejado,
   Zona,
 } from "@/types/database";
 import { fmtSec } from "@/lib/format";
 import { useT } from "@/lib/i18n";
+
+type ExecComFb = TreinoExecutado & {
+  feedback:
+    | { status: FeedbackStatus }
+    | { status: FeedbackStatus }[]
+    | null;
+};
+
+function fbStatus(e: ExecComFb): FeedbackStatus | null {
+  const f = e.feedback;
+  if (!f) return null;
+  return (Array.isArray(f) ? f[0]?.status : f.status) ?? null;
+}
+
+/** avaliado = marcado à mão pelo coach OU feedback já enviado ao aluno */
+function foiAvaliado(e: ExecComFb): boolean {
+  return e.avaliado_em != null || fbStatus(e) === "enviado";
+}
 
 const COR_ZONA: Record<string, string> = {
   Z1: "var(--z1)",
@@ -30,7 +49,7 @@ export function AlunoDetalhePage() {
   const [cicloId, setCicloId] = useState<string | null>(null);
   const [zonas, setZonas] = useState<Zona[]>([]);
   const [treinos, setTreinos] = useState<TreinoPlanejado[]>([]);
-  const [execucoes, setExecucoes] = useState<TreinoExecutado[]>([]);
+  const [execucoes, setExecucoes] = useState<ExecComFb[]>([]);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
@@ -70,11 +89,14 @@ export function AlunoDetalhePage() {
         .select("*")
         .eq("ciclo_id", cicloId)
         .order("codigo"),
-      supabase.from("treino_executado").select("*").eq("aluno_id", id),
+      supabase
+        .from("treino_executado")
+        .select("*, feedback(status)")
+        .eq("aluno_id", id),
     ]).then(([z, t, e]) => {
       setZonas((z.data ?? []) as Zona[]);
       setTreinos((t.data ?? []) as TreinoPlanejado[]);
-      setExecucoes((e.data ?? []) as TreinoExecutado[]);
+      setExecucoes((e.data ?? []) as unknown as ExecComFb[]);
     });
   }, [cicloId, id]);
 
@@ -227,8 +249,9 @@ export function AlunoDetalhePage() {
                     : exec.status_match === "pendente_revisao"
                       ? "review"
                       : "done";
+                  const avaliado = exec ? foiAvaliado(exec) : false;
                   return (
-                    <tr key={tp.id}>
+                    <tr key={tp.id} className={avaliado ? "tr-avaliado" : ""}>
                       <td className="campo">
                         <span className={`wk-dot ${dot}`} />
                         {tp.codigo}
@@ -249,6 +272,14 @@ export function AlunoDetalhePage() {
                       <td>
                         {exec ? (
                           <Link to={`/aluno/${aluno.id}/treino/${exec.id}`}>
+                            {avaliado && (
+                              <span
+                                className="wk-check"
+                                title={t("aluno.reviewed")}
+                              >
+                                ✓{" "}
+                              </span>
+                            )}
                             {exec.data_execucao} ·{" "}
                             {exec.duracao_real_sec
                               ? fmtSec(exec.duracao_real_sec)

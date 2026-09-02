@@ -139,6 +139,8 @@ export type TreinoExecutado = {
   arquivo_fit_path: string | null;
   status_match: StatusMatch;
   etapas: EtapaExecutada[];
+  /** marca manual do coach ("já avaliei este treino"); ver migração 0004 */
+  avaliado_em: string | null;
   criado_em: string;
 };
 
@@ -174,9 +176,10 @@ export type Database = {
       >;
       treino_executado: Table<
         TreinoExecutado,
-        Omit<TreinoExecutado, "id" | "criado_em"> & {
+        Omit<TreinoExecutado, "id" | "criado_em" | "avaliado_em"> & {
           id?: string;
           criado_em?: string;
+          avaliado_em?: string | null;
         },
         Partial<TreinoExecutado>
       >;
