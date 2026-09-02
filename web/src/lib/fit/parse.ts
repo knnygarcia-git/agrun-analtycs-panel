@@ -199,16 +199,23 @@ export function calcularEtapas(
     let posNaZona: number | null = null;
     if (
       faixaPlano &&
-      faixaPlano.rapidoSec != null &&
-      faixaPlano.lentoSec != null
+      (faixaPlano.rapidoSec != null || faixaPlano.lentoSec != null)
     ) {
-      const rap = faixaPlano.rapidoSec;
-      const len = faixaPlano.lentoSec;
+      // Z5 não tem limite rápido (qualquer pace mais veloz conta);
+      // Z1 não tem limite lento.
+      const rap = faixaPlano.rapidoSec ?? 0;
+      const len = faixaPlano.lentoSec ?? Number.POSITIVE_INFINITY;
       if (pacesRec.length) {
         const dentro = pacesRec.filter((p) => p >= rap && p <= len).length;
         pctNaFaixa = Math.round((dentro / pacesRec.length) * 100);
       }
-      if (paceSec != null && len !== rap) {
+      // posição na zona só faz sentido com os dois limites reais
+      if (
+        paceSec != null &&
+        faixaPlano.rapidoSec != null &&
+        faixaPlano.lentoSec != null &&
+        len !== rap
+      ) {
         // 1 = colado no rápido · 0 = colado no lento · >1 rápido demais · <0 lento demais
         posNaZona = Math.round(((len - paceSec) / (len - rap)) * 100) / 100;
       }

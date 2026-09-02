@@ -143,10 +143,13 @@ export function GraficoPlanoRealizado({
         >
           {/* bandas planejadas */}
           {bandas.map((b, i) => {
-            if (b.rapidoSec == null || b.lentoSec == null) return null;
+            if (b.zona == null || (b.rapidoSec == null && b.lentoSec == null))
+              return null;
             const cor = (b.zona && COR_ZONA[b.zona]) || "#8B94A3";
-            const yTop = sy(b.rapidoSec);
-            const yBot = sy(b.lentoSec);
+            // Z5 não tem limite rápido → banda sobe até o topo do gráfico;
+            // Z1 não tem limite lento → banda desce até a base.
+            const yTop = sy(b.rapidoSec ?? domY[0]);
+            const yBot = sy(b.lentoSec ?? domY[1]);
             return (
               <rect
                 key={i}
@@ -236,18 +239,22 @@ export function GraficoPlanoRealizado({
                 {t("grafico.hrLabel")} <b>{hp.hr} {t("grafico.bpm")}</b>
               </div>
             )}
-            {hoverBanda?.zona && hoverBanda.rapidoSec != null && (
-              <div className="tt-plano">
-                {t("grafico.planLabel", {
-                  zona: hoverBanda.zona,
-                  rapido: fmtSec(hoverBanda.rapidoSec),
-                  lento:
-                    hoverBanda.lentoSec != null
-                      ? fmtSec(hoverBanda.lentoSec)
-                      : "—",
-                })}
-              </div>
-            )}
+            {hoverBanda?.zona &&
+              (hoverBanda.rapidoSec != null || hoverBanda.lentoSec != null) && (
+                <div className="tt-plano">
+                  {t("grafico.planLabel", {
+                    zona: hoverBanda.zona,
+                    rapido:
+                      hoverBanda.rapidoSec != null
+                        ? fmtSec(hoverBanda.rapidoSec)
+                        : t("aluno.max"),
+                    lento:
+                      hoverBanda.lentoSec != null
+                        ? fmtSec(hoverBanda.lentoSec)
+                        : t("aluno.max"),
+                  })}
+                </div>
+              )}
           </div>
         )}
       </div>
