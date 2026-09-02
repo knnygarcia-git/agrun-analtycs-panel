@@ -1,0 +1,82 @@
+/* Design system AGRUN — seção 7 da especificação técnica.
+   Tema único (escuro). O espectro de zona (--z1..--z5) é FUNCIONAL:
+   usar só para representar dado, nunca para chrome/branding. */
+
+:root {
+  /* Superfícies e texto — escuro puxado para o azul da marca */
+  --ink: #0e1524; /* fundo da aplicação */
+  --panel: #161f31; /* superfície de card */
+  --panel-2: #1d2740;
+  --line: #2a3550; /* hairlines */
+  --text: #edeff2;
+  --muted: #8b94a3;
+  --muted-2: #5b6472;
+
+  /* Sidebar — azul da marca */
+  --sidebar-bg: #1c428f;
+  --sidebar-text: rgba(255, 255, 255, 0.78);
+  --sidebar-active: rgba(255, 255, 255, 0.14);
+  --sidebar-hover: rgba(255, 255, 255, 0.07);
+  --sidebar-line: rgba(255, 255, 255, 0.16);
+
+  /* Espectro funcional de zona — só para dado */
+  --z1: #4c8cff;
+  --z2: #35b7a0;
+  --z3: #e8c547;
+  --z4: #f2874a;
+  --z5: #e23b3b;
+
+  /* Marca AGRUN — amostradas do logo oficial (logo/agrun-colorido.png) */
+  --brand-blue: #1c428f;
+  --brand-orange: #f39119;
+
+  --font-head: "Poppins", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  /* Raios — UI arredondada e minimalista */
+  --radius: 8px;
+  --radius-pill: 999px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--ink);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.display {
+  font-family: var(--font-head);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* Números sempre tabulares (seção 7) */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: var(--font-head);
+}

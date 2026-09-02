@@ -1,0 +1,28 @@
+# deps
+node_modules/
+web/node_modules/
+
+# build
+web/dist/
+web/.vite/
+web/*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+web/.env
+web/.env.local
+
+# supabase local
+supabase/.branches/
+supabase/.temp/
+
+# editor / os
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+web/public/_ref.xlsx
+web/public/_res.FIT

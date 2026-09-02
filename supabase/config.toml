@@ -1,0 +1,9 @@
+# Configuração da CLI do Supabase. Ajuste project_id se quiser rodar local.
+project_id = "agrun-painel"
+
+[db]
+major_version = 15
+
+[auth]
+# Single-tenant: só o coach. Conta criada manualmente no painel do Supabase.
+enable_signup = false

@@ -1,0 +1,3 @@
+-- Fixtures de teste (seção 10 da especificação) — aluno Arthur, ciclo "Planilha 21km #2".
+-- Vazio por ora: será preenchido no passo 2 (importador de planilha) / passo 6 (teste com Arthur),
+-- usando os dados já validados no protótipo HTML (arrays ZONAS, WORKOUTS, ETAPAS).

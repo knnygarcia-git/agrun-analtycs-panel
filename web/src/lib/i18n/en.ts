@@ -1,0 +1,350 @@
+import type { pt } from "./pt";
+
+/* English dictionary. Same keys as pt.ts (compile error if one is missing). */
+
+export const en: Record<keyof typeof pt, string> = {
+  // generic
+  "common.loading": "Loading…",
+  "common.cancel": "Cancel",
+  "common.save": "Save",
+  "common.saving": "Saving…",
+  "common.back": "Back",
+  "common.backToPanel": "Panel",
+  "common.backToAthlete": "Back to athlete",
+  "common.dangerZone": "Danger zone",
+  "common.none": "Select…",
+  "common.dash": "—",
+
+  // nav / sidebar
+  "nav.subtitle": "Workout feedback review",
+  "nav.newAthlete": "New athlete",
+  "nav.importPlan": "Import plan",
+  "nav.importFit": "Import .FIT",
+  "nav.signOut": "Sign out",
+  "nav.loadError": "Failed to load: {msg}",
+  "nav.noAthletes": "No athletes yet.",
+  "nav.language": "Language",
+
+  // login
+  "login.subtitle": "Workout feedback review",
+  "login.email": "Email",
+  "login.password": "Password",
+  "login.enter": "Sign in",
+  "login.entering": "Signing in…",
+  "login.badCredentials": "Wrong email or password.",
+  "login.notConfirmed": "Email not confirmed yet.",
+
+  // home
+  "home.title": "AGRUN Panel",
+  "home.subtitle": "Review and approve workout feedback",
+  "home.start": "Get started",
+  "home.startHint":
+    "then import a training-cycle spreadsheet. After that, import each workout result (.FIT) and generate the feedback.",
+  "home.startHintNewAthlete": "Add an athlete",
+
+  // athlete detail
+  "aluno.noGoal": "no goal set",
+  "aluno.notFound": "Athlete not found.",
+  "aluno.editAthlete": "Edit athlete",
+  "aluno.importPlan": "Import plan",
+  "aluno.importFit": "Import .FIT",
+  "aluno.noCycle": "No cycle imported.",
+  "aluno.cycle": "Cycle",
+  "aluno.editCycleZones": "Edit cycle / zones",
+  "aluno.ftpPace": "FTP pace",
+  "aluno.testDate": "Test date",
+  "aluno.zonesTitle": "Zones - Pace (min/km)",
+  "aluno.colZone": "Zone",
+  "aluno.colFast": "Fast",
+  "aluno.colSlow": "Slow",
+  "aluno.colDescription": "Description",
+  "aluno.max": "max",
+  "aluno.cycleWorkoutsTitle": "{count} workouts in the cycle",
+  "aluno.colWorkout": "Workout",
+  "aluno.colWeek": "Wk",
+  "aluno.colType": "Type",
+  "aluno.colDuration": "Duration",
+  "aluno.colVolume": "Volume (km)",
+  "aluno.colStructure": "Structure",
+  "aluno.colExecution": "Execution",
+  "aluno.importFitShort": "import .FIT",
+
+  // new athlete
+  "novoAluno.title": "New athlete",
+  "novoAluno.name": "Name",
+  "novoAluno.goal": "Current goal",
+  "novoAluno.goalPlaceholder": "e.g. half marathon in November",
+  "novoAluno.notes": "Coach notes",
+  "novoAluno.notesPlaceholder":
+    "history, injuries, context — goes into the feedback prompt",
+  "novoAluno.saveAthlete": "Save athlete",
+
+  // edit athlete
+  "editarAluno.title": "Edit athlete",
+  "editarAluno.confirmDelete":
+    'Delete "{nome}" and ALL of their cycles, workouts and feedback? This cannot be undone.',
+  "editarAluno.deleteAthlete": "Delete this athlete",
+
+  // edit cycle
+  "editarCiclo.title": "Edit cycle",
+  "editarCiclo.subtitle": "Manual tweaks without re-importing the spreadsheet.",
+  "editarCiclo.notFound": "Cycle not found.",
+  "editarCiclo.cycle": "Cycle",
+  "editarCiclo.goal": "Goal",
+  "editarCiclo.sequence": "Sequence",
+  "editarCiclo.ftpPace": "FTP pace (M:SS)",
+  "editarCiclo.startDate": "Start date",
+  "editarCiclo.endDate": "End date",
+  "editarCiclo.thresholdTestDate": "Threshold test date",
+  "editarCiclo.zonesTitle": "Zones - Pace (M:SS per km)",
+  "editarCiclo.colZone": "Zone",
+  "editarCiclo.colFast": "Fast",
+  "editarCiclo.colSlow": "Slow",
+  "editarCiclo.z5Placeholder": "(empty = max)",
+  "editarCiclo.badFast": '{zona}: invalid fast pace ("{valor}"). Use M:SS.',
+  "editarCiclo.badSlow": '{zona}: invalid slow pace ("{valor}"). Use M:SS.',
+  "editarCiclo.badFtp": 'Invalid FTP pace ("{valor}"). Use M:SS.',
+  "editarCiclo.confirmDelete":
+    'Delete the cycle "{objetivo} #{seq}"? This removes the 5 zones, the planned workouts and unlinks the imported executions.',
+  "editarCiclo.deleteCycle": "Delete this cycle",
+
+  // import plan
+  "importPlan.title": "Import plan",
+  "importPlan.subtitle":
+    "Reads the cycle, zones and workouts from an Nkm Planilha NN sheet.",
+  "importPlan.step1": "1. Athlete + file",
+  "importPlan.step2": "2. Choose cycle",
+  "importPlan.step3": "3. Review and confirm",
+  "importPlan.noSheetFound":
+    'No sheet matching "Nkm Planilha NN" (e.g. "5km Planilha 01", "21km Planilha 02") was found in this file.',
+  "importPlan.readError": "Could not read the file: {msg}",
+  "importPlan.athlete": "Athlete",
+  "importPlan.noAthletes": "No athletes registered.",
+  "importPlan.registerFirst": "Add an athlete",
+  "importPlan.registerFirstTail": "before importing.",
+  "importPlan.file": ".xlsx file",
+  "importPlan.chooseAthleteFirst": "Choose the athlete first.",
+  "importPlan.fileAthleteLine": "{arquivo} · athlete: {nome}",
+  "importPlan.whichCycle": "Which cycle to import? ({count} sheet{plural})",
+  "importPlan.changeFile": "Change file",
+  "importPlan.nameMismatch":
+    'The name in the spreadsheet ("{planilha}") does not look like the selected athlete ("{aluno}"). Nothing will be overwritten — make sure it is the right spreadsheet.',
+  "importPlan.periodOverlap":
+    "Period overlaps a cycle already imported for this athlete ({objetivo} #{seq}, {inicio} to {fim}).",
+  "importPlan.saveError": "Failed to save: {msg}",
+  "importPlan.confirmImport": "Confirm import",
+  "importPlan.cycleImported": "Cycle imported. Redirecting…",
+
+  // cycle review (spreadsheet)
+  "confCiclo.error": "ERROR",
+  "confCiclo.warning": "WARNING",
+  "confCiclo.sheet": "Sheet",
+  "confCiclo.goalSeq": "Goal · seq",
+  "confCiclo.period": "Period",
+  "confCiclo.ftpPace": "FTP pace",
+  "confCiclo.hasErrors":
+    "Some fields have errors (highlighted below). Fix them in the spreadsheet and re-import — the import stays blocked until then.",
+  "confCiclo.noErrors":
+    "Read with no critical errors. Check the values below before confirming.",
+  "confCiclo.cycleHeader": "Cycle header",
+  "confCiclo.colField": "Field",
+  "confCiclo.colValueRead": "Value read",
+  "confCiclo.colCell": "Cell",
+  "confCiclo.colCells": "Cells",
+  "confCiclo.colStatus": "Status",
+  "confCiclo.rowAthleteName": "Athlete name (spreadsheet)",
+  "confCiclo.rowGoal": "Goal",
+  "confCiclo.rowSequence": "Sequence",
+  "confCiclo.rowStartDate": "Start date",
+  "confCiclo.rowEndDate": "End date",
+  "confCiclo.rowFtpPace": "FTP pace",
+  "confCiclo.rowTestDate": "Test date",
+  "confCiclo.zonesTitle": "Zones (pace)",
+  "confCiclo.colZone": "Zone",
+  "confCiclo.colFastSlow": "Fast → Slow",
+  "confCiclo.max": "max",
+  "confCiclo.workoutsTitle": "{count} workouts",
+  "confCiclo.colWorkout": "Workout",
+  "confCiclo.colWeek": "Wk",
+  "confCiclo.colType": "Type",
+  "confCiclo.colDuration": "Duration",
+  "confCiclo.colVolume": "Volume (km)",
+  "confCiclo.colStructure": "Structure",
+
+  // import .FIT
+  "importFit.title": "Import result (.FIT)",
+  "importFit.subtitle":
+    "Matches the file to a planned workout and computes the stages.",
+  "importFit.readError": "Could not read the file: {msg}",
+  "importFit.athlete": "Athlete",
+  "importFit.noAthletes": "No athletes registered.",
+  "importFit.registerFirst": "Add an athlete",
+  "importFit.registerFirstTail": "first.",
+  "importFit.fileLabel": "Result .FIT file",
+  "importFit.reading": "Reading the file…",
+  "importFit.readingProgress": "Reading workout {i} of {total}…",
+  "importFit.chooseAthleteFirst": "Choose the athlete first.",
+  "importFit.accepts":
+    "Accepts the .FIT, the .FIT.gz, or the .zip of multiple workouts downloaded from TrainingPeaks (no need to extract).",
+  "importFit.saveError": "Failed to save: {msg}",
+  "importFit.confirmProcess": "Confirm and process",
+  "importFit.confirmManualProcess": "Confirm manually and process",
+  "importFit.replacePrompt":
+    "An execution is already imported for {codigo} ({data}). Replace it with the new one?",
+  "importFit.processed": "Workout processed. Redirecting…",
+
+  // single-workout review (.FIT)
+  "confFit.fileWorkout": "Workout (file)",
+  "confFit.executionDate": "Execution date",
+  "confFit.realDuration": "Actual duration",
+  "confFit.planned": "Planned",
+  "confFit.difference": "Difference",
+  "confFit.matchWith": "Match with the planned workout",
+  "confFit.stageComparisonTitle": "Plan vs. actual — by stage",
+  "confFit.stagesOutOfZone_one":
+    "{count} stage fell outside the planned zone (highlighted below). Zone computed from the athlete's table, not the file.",
+  "confFit.stagesOutOfZone_other":
+    "{count} stages fell outside the planned zone (highlighted below). Zone computed from the athlete's table, not the file.",
+  "confFit.allInZone": "All stages fell within the planned zone.",
+
+  // stage names (code-generated, not from the spreadsheet)
+  "etapa.warmup": "Warm-up",
+  "etapa.active": "Active",
+  "etapa.cooldown": "Cool-down",
+  "etapa.interval": "Interval",
+  "etapa.recovery": "Recovery",
+  "etapa.generic": "Stage",
+  "etapa.km": "km {n}",
+  "etapa.rest": "rest",
+
+  // stages table (shared)
+  "etapas.stage": "Stage",
+  "etapas.start": "Start",
+  "etapas.end": "End",
+  "etapas.duration": "Duration",
+  "etapas.km": "Km",
+  "etapas.pace": "Pace",
+  "etapas.zone": "Zone",
+  "etapas.plan": "Plan",
+  "etapas.inRange": "In range",
+  "etapas.hrMinAvgMax": "HR min/avg/max",
+  "etapas.cadAvgMax": "Cad. avg/max",
+  "etapas.cadAvg": "Cad. avg",
+  "etapas.elevMinAvgMax": "Elevation min/avg/max (m)",
+
+  // batch import (.zip)
+  "lote.summary":
+    "{total} workout{pluralTotal} in the file · {marcados} marked for import",
+  "lote.summaryReview": " · {count} to review",
+  "lote.summaryReplaceOne": " · 1 already exists and will be replaced",
+  "lote.summaryReplaceMany": " · {count} already exist and will be replaced",
+  "lote.result_one": "{count} imported.",
+  "lote.result_other": "{count} imported.",
+  "lote.resultWithFails_one": "{ok} imported, {fail} failed.",
+  "lote.resultWithFails_other": "{ok} imported, {fail} failed.",
+  "lote.colCheck": "✓",
+  "lote.colWorkout": "Workout",
+  "lote.colDate": "Date",
+  "lote.colRealPlan": "Actual / plan",
+  "lote.colMatchWith": "Match with the planned workout",
+  "lote.colStatus": "Status",
+  "lote.stages": "stages",
+  "lote.close": "close",
+  "lote.saving": "saving…",
+  "lote.imported": "✓ imported",
+  "lote.failed": "✗ {msg}",
+  "lote.failedGeneric": "failed",
+  "lote.noWorkoutChosen": "no workout chosen",
+  "lote.matchedAuto": "auto-matched",
+  "lote.reviewFirst": "review first",
+  "lote.replaceSuffix": " · already exists, will replace",
+  "lote.noPlanMatch": "no workout in the plan — choose or skip",
+  "lote.detailRealDuration": "Actual duration",
+  "lote.detailPlanned": "Planned",
+  "lote.detailDifference": "Difference",
+  "lote.detailStagesOutOfZone": "Stages out of zone",
+  "lote.noStages":
+    "No stages to show (choose a workout from the plan to compare).",
+  "lote.importN_one": "Import {count} workout",
+  "lote.importN_other": "Import {count} workouts",
+  "lote.importing": "Importing…",
+  "lote.done": "Done",
+
+  // workout detail
+  "treino.notFound": "Workout not found.",
+  "treino.workoutFallback": "Workout",
+  "treino.removeExecution": "Remove execution",
+  "treino.confirmRemove":
+    "Remove this execution (stages + feedback + .FIT file)? The planned workout stays in the cycle.",
+  "treino.realDuration": "Actual duration",
+  "treino.planned": "Planned",
+  "treino.difference": "Difference",
+  "treino.match": "Match",
+  "treino.matchAuto": "Automatic",
+  "treino.matchManual": "Manual",
+  "treino.matchReview": "To review",
+  "treino.paceHrTitle": "Pace and heart rate",
+  "treino.chartReprocessError":
+    "Could not reprocess the chart for this file ({msg}). The per-stage table below is still valid.",
+  "treino.reprocessing": "Reprocessing the file…",
+  "treino.stageComparisonTitle": "Plan vs. actual — by stage",
+  "treino.feedbackTitle": "Feedback",
+
+  // charts
+  "grafico.pace": "Pace",
+  "grafico.hr": "Heart rate",
+  "grafico.max": "Max",
+  "grafico.avg": "Avg",
+  "grafico.min": "Min",
+  "grafico.perKm": "/km",
+  "grafico.bpm": "bpm",
+  "grafico.noSeries": "No data series in the file.",
+  "grafico.noPaceSeries": "No pace series in this file.",
+  "grafico.zone": "zone {z}",
+  "grafico.planVsReal": "Planned vs. actual pace",
+  "grafico.time": "Time",
+  "grafico.distance": "Distance",
+  "grafico.paceLabel": "Pace",
+  "grafico.hrLabel": "HR",
+  "grafico.planLabel": "Plan: {zona} ({rapido}–{lento})",
+  "grafico.legendReal": "actual",
+  "grafico.legendPlanned": "planned range (by zone)",
+
+  // feedback
+  "feedback.statusPendente": "AWAITING DRAFT",
+  "feedback.statusRascunho": "DRAFT — REVIEW",
+  "feedback.statusAprovado": "APPROVED",
+  "feedback.statusEnviado": "SENT",
+  "feedback.loading": "Loading feedback…",
+  "feedback.draftGeneratedAt": "draft generated on {data}",
+  "feedback.noDraft": "No draft for this workout.",
+  "feedback.generate": "Generate draft",
+  "feedback.generating": "Generating…",
+  "feedback.modelNoText": "The model returned no text.",
+  "feedback.labelSent": "Sent to the athlete",
+  "feedback.labelApproved":
+    "Approved by the coach — review before marking as sent",
+  "feedback.labelDraft": "AI draft — edit freely before approving",
+  "feedback.approve": "Approve",
+  "feedback.regenerate": "Generate a new draft",
+  "feedback.discard": "Discard",
+  "feedback.markSent": "Mark as sent to the athlete",
+  "feedback.backToDraft": "Back to draft",
+  "feedback.sentAt": "✓ Sent on {data} — copy the text above into TrainingPeaks.",
+  "feedback.sentNoDate": "✓ Sent — copy the text above into TrainingPeaks.",
+
+  // matching (match.ts) — reason
+  "match.noCodeInFile":
+    "Could not find a T01–T16 code in the file's workout name. Choose the workout manually.",
+  "match.codeNoCycleCovers":
+    "{codigo} exists in the athlete's plan, but no cycle covers the date {data}. Choose manually.",
+  "match.noCodeInPlan":
+    "No {codigo} in the athlete's plan. Choose manually.",
+  "match.multipleCycles":
+    "{count} cycles cover the date {data} with a {codigo}. Confirm which one is right.",
+  "match.noPlanDuration":
+    "{codigo} matched by date, but the plan has no duration to compare. Review before processing.",
+  "match.autoOk": "{codigo} · duration matches within {tol}% ({diff}%).",
+  "match.durationDiverges":
+    "{codigo} matched by date, but the duration diverges {diff}% from the plan. It may be another workout with a similar name — confirm before processing.",
+};
