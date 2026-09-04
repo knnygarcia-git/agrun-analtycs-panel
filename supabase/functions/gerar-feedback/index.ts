@@ -3,6 +3,9 @@
 //
 // Deploy pelo painel do Supabase (Edge Functions → Deploy a new function).
 // Secret necessária: GEMINI_API_KEY  (Edge Functions → Secrets)
+// Secret opcional: GROQ_API_KEY — se configurada, é usada como plano B quando
+// o Gemini está sobrecarregado (503/429) ou fora do ar, pra reduzir o erro de
+// "alta demanda" pro coach sem depender de billing no Google.
 // SUPABASE_URL e SUPABASE_ANON_KEY já são injetadas automaticamente.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
@@ -10,6 +13,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 const MODELO = "gemini-flash-lite-latest";
 const GEMINI_URL = (m: string) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
+
+const GROQ_MODELO = "llama-3.3-70b-versatile";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const SYSTEM_PROMPT = `Você é um assistente que ajuda o coach da AGRUN (corrida de rua) a redigir RASCUNHOS de feedback de treino. O coach sempre revisa e edita antes de enviar.
 
@@ -109,6 +115,102 @@ Treinos anteriores deste aluno: FC média e máxima nos tiros parecidas com as d
 const EX3_OUT = `Oi João, tudo bem? No aquecimento você foi bem em Z1 e Z2. Você conseguiu manter bem os tiros em Z5 — o primeiro saiu um pouco mais rápido, mas nos outros você já ajustou. O intervalo de descanso depois do 5º tiro você acelerou um pouco, procure sempre manter em Z1, esses intervalos são para descansar. Sua frequência cardíaca está respondendo bem aos treinos mais intensos, tanto a média quanto a mínima e a máxima, está bem bom. Tem algo que precisa relatar sobre esse treino?`;
 
 // -----------------------------------------------------------------------------
+
+async function chamarGemini(
+  geminiKey: string,
+  mensagem: string,
+): Promise<{ texto: string } | { erro: string; overload: boolean }> {
+  const corpo = JSON.stringify({
+    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: [
+      { role: "user", parts: [{ text: EX1_IN }] },
+      { role: "model", parts: [{ text: EX1_OUT }] },
+      { role: "user", parts: [{ text: EX2_IN }] },
+      { role: "model", parts: [{ text: EX2_OUT }] },
+      { role: "user", parts: [{ text: EX3_IN }] },
+      { role: "model", parts: [{ text: EX3_OUT }] },
+      { role: "user", parts: [{ text: mensagem }] },
+    ],
+    generationConfig: { temperature: 0.7, maxOutputTokens: 1200 },
+  });
+
+  let resp: Response | null = null;
+  let ultimoErro = "";
+  for (let tentativa = 0; tentativa < 4; tentativa++) {
+    if (tentativa > 0) await new Promise((r) => setTimeout(r, 1500 * tentativa));
+    try {
+      resp = await fetch(GEMINI_URL(MODELO), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
+        body: corpo,
+      });
+    } catch (e) {
+      ultimoErro = (e as Error).message;
+      continue;
+    }
+    if (resp.status !== 503 && resp.status !== 429) break;
+    ultimoErro = `HTTP ${resp.status}`;
+  }
+  if (!resp) return { erro: ultimoErro, overload: false };
+
+  const gj = await resp.json();
+  if (!resp.ok || gj.error) {
+    return {
+      erro: gj.error?.message ?? `HTTP ${resp.status}`,
+      overload: resp.status === 503 || resp.status === 429,
+    };
+  }
+
+  const texto: string | undefined = gj.candidates?.[0]?.content?.parts
+    ?.map((p: { text?: string }) => p.text ?? "")
+    .join("")
+    .trim();
+
+  if (!texto) return { erro: "o modelo devolveu resposta vazia", overload: false };
+  return { texto };
+}
+
+/** Plano B quando o Gemini está sobrecarregado — mesmo prompt/few-shots, só
+ *  reformatado pro formato de mensagens (OpenAI-style) que o Groq usa. */
+async function chamarGroq(
+  groqKey: string,
+  mensagem: string,
+): Promise<{ texto: string } | { erro: string }> {
+  const corpo = JSON.stringify({
+    model: GROQ_MODELO,
+    temperature: 0.7,
+    max_tokens: 1200,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: EX1_IN },
+      { role: "assistant", content: EX1_OUT },
+      { role: "user", content: EX2_IN },
+      { role: "assistant", content: EX2_OUT },
+      { role: "user", content: EX3_IN },
+      { role: "assistant", content: EX3_OUT },
+      { role: "user", content: mensagem },
+    ],
+  });
+
+  let resp: Response;
+  try {
+    resp = await fetch(GROQ_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${groqKey}` },
+      body: corpo,
+    });
+  } catch (e) {
+    return { erro: (e as Error).message };
+  }
+
+  const gj = await resp.json();
+  if (!resp.ok || gj.error) {
+    return { erro: gj.error?.message ?? `HTTP ${resp.status}` };
+  }
+  const texto: string | undefined = gj.choices?.[0]?.message?.content?.trim();
+  if (!texto) return { erro: "o modelo devolveu resposta vazia" };
+  return { texto };
+}
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -287,6 +389,7 @@ Deno.serve(async (req) => {
 
   const geminiKey = Deno.env.get("GEMINI_API_KEY");
   if (!geminiKey) return json({ error: "GEMINI_API_KEY não configurada" }, 500);
+  const groqKey = Deno.env.get("GROQ_API_KEY");
 
   let treinoId: string | undefined;
   try {
@@ -339,59 +442,20 @@ Deno.serve(async (req) => {
   // deno-lint-ignore no-explicit-any
   const mensagem = construirMensagem(te as any, anteriores);
 
-  const corpo = JSON.stringify({
-    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-    contents: [
-      { role: "user", parts: [{ text: EX1_IN }] },
-      { role: "model", parts: [{ text: EX1_OUT }] },
-      { role: "user", parts: [{ text: EX2_IN }] },
-      { role: "model", parts: [{ text: EX2_OUT }] },
-      { role: "user", parts: [{ text: EX3_IN }] },
-      { role: "model", parts: [{ text: EX3_OUT }] },
-      { role: "user", parts: [{ text: mensagem }] },
-    ],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 1200 },
-  });
+  const viaGemini = await chamarGemini(geminiKey, mensagem);
+  if ("texto" in viaGemini) return json({ texto: viaGemini.texto });
 
-  let resp: Response | null = null;
-  let ultimoErro = "";
-  for (let tentativa = 0; tentativa < 4; tentativa++) {
-    if (tentativa > 0) await new Promise((r) => setTimeout(r, 1500 * tentativa));
-    try {
-      resp = await fetch(GEMINI_URL(MODELO), {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
-        body: corpo,
-      });
-    } catch (e) {
-      ultimoErro = (e as Error).message;
-      continue;
-    }
-    if (resp.status !== 503 && resp.status !== 429) break;
-    ultimoErro = `HTTP ${resp.status}`;
-  }
-  if (!resp) return json({ error: `falha ao chamar o Gemini: ${ultimoErro}` }, 502);
-
-  const gj = await resp.json();
-  if (!resp.ok || gj.error) {
-    const m = gj.error?.message ?? `HTTP ${resp.status}`;
-    return json(
-      {
-        error:
-          resp.status === 503 || resp.status === 429
-            ? "O Gemini está com alta demanda agora. Tente gerar o rascunho de novo em alguns segundos."
-            : `Gemini: ${m}`,
-      },
-      502,
-    );
+  if (groqKey) {
+    const viaGroq = await chamarGroq(groqKey, mensagem);
+    if ("texto" in viaGroq) return json({ texto: viaGroq.texto });
   }
 
-  const texto: string | undefined = gj.candidates?.[0]?.content?.parts
-    ?.map((p: { text?: string }) => p.text ?? "")
-    .join("")
-    .trim();
-
-  if (!texto) return json({ error: "o modelo devolveu resposta vazia" }, 502);
-
-  return json({ texto });
+  return json(
+    {
+      error: viaGemini.overload
+        ? "O Gemini está com alta demanda agora. Tente gerar o rascunho de novo em alguns segundos."
+        : `Gemini: ${viaGemini.erro}`,
+    },
+    502,
+  );
 });
