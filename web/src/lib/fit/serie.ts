@@ -71,19 +71,60 @@ export interface FaixaPlano {
   lentoSec: number | null;
 }
 
+/** Distância real (m) no instante `tAlvo` (s), interpolando a série real.
+ *  Sem série suficiente, cai no `fallback` (estimativa por pace de zona). */
+function distNoInstante(tAlvo: number, serie: PontoSerie[], fallback: number): number {
+  if (serie.length < 2) return fallback;
+  if (tAlvo <= serie[0].t) return serie[0].dist;
+  const ultimo = serie[serie.length - 1];
+  if (tAlvo >= ultimo.t) return ultimo.dist;
+  for (let i = 1; i < serie.length; i++) {
+    if (serie[i].t >= tAlvo) {
+      const a = serie[i - 1];
+      const b = serie[i];
+      const frac = b.t === a.t ? 0 : (tAlvo - a.t) / (b.t - a.t);
+      return a.dist + (b.dist - a.dist) * frac;
+    }
+  }
+  return ultimo.dist;
+}
+
+/** Tempo real (s) em que a distância acumulada bateu `dAlvo` (m), interpolando
+ *  a série real. Sem série suficiente, cai no `fallback` (estimativa). */
+function tempoNaDistancia(dAlvo: number, serie: PontoSerie[], fallback: number): number {
+  if (serie.length < 2) return fallback;
+  if (dAlvo <= serie[0].dist) return serie[0].t;
+  const ultimo = serie[serie.length - 1];
+  if (dAlvo >= ultimo.dist) return ultimo.t;
+  for (let i = 1; i < serie.length; i++) {
+    if (serie[i].dist >= dAlvo) {
+      const a = serie[i - 1];
+      const b = serie[i];
+      const frac = b.dist === a.dist ? 0 : (dAlvo - a.dist) / (b.dist - a.dist);
+      return a.t + (b.t - a.t) * frac;
+    }
+  }
+  return ultimo.t;
+}
+
 /** Constrói a faixa planejada (trechos) num eixo de tempo ou de distância.
- *  Trechos em tempo são convertidos para distância (e vice-versa) usando o
- *  pace médio da zona do trecho. */
+ *  Quando o trecho já está na unidade pedida, usa o valor exato do plano.
+ *  Quando precisa converter (ex: trecho em minutos, eixo em distância), usa
+ *  o histórico REAL de tempo×distância do treino (não o pace da zona) —
+ *  senão a faixa desalinha da linha real sempre que o aluno correu num pace
+ *  diferente do planejado, e o erro se acumula trecho a trecho. */
 export function faixaPlanejada(
   estrutura: string | null,
   faixas: FaixaZona[],
   eixo: "tempo" | "dist",
+  serieReal: PontoSerie[] = [],
   paceFallbackSec = 360,
 ): FaixaPlano[] {
   const segs = parseEstrutura(estrutura);
   const porCodigo = new Map(faixas.map((f) => [f.codigo, f]));
   const out: FaixaPlano[] = [];
-  let cursor = 0;
+  let tCursor = 0; // segundos planejados acumulados (exato para trechos em tempo)
+  let dCursor = 0; // metros planejados acumulados (exato para trechos em distância)
 
   for (const s of segs) {
     const fz = s.zona ? porCodigo.get(s.zona) : undefined;
@@ -92,26 +133,29 @@ export function faixaPlanejada(
         ? (fz.rapidoSec + fz.lentoSec) / 2
         : fz?.rapidoSec ?? fz?.lentoSec ?? paceFallbackSec;
 
-    // valor do trecho no eixo pedido
-    let extensao: number;
-    if (s.eixo === eixo) {
-      extensao = s.valor;
-    } else if (eixo === "dist") {
-      // tempo(seg) -> distância(m): m = seg / (paceMid_seg_por_km / 1000)
-      extensao = (s.valor / paceMid) * 1000;
+    let t0: number, t1: number, d0: number, d1: number;
+    if (s.eixo === "tempo") {
+      t0 = tCursor;
+      t1 = tCursor + s.valor;
+      d0 = dCursor;
+      d1 = distNoInstante(t1, serieReal, dCursor + (s.valor / paceMid) * 1000);
     } else {
-      // distância(m) -> tempo(seg)
-      extensao = (s.valor / 1000) * paceMid;
+      d0 = dCursor;
+      d1 = dCursor + s.valor;
+      t0 = tCursor;
+      t1 = tempoNaDistancia(d1, serieReal, tCursor + (s.valor / 1000) * paceMid);
     }
 
     out.push({
-      x0: cursor,
-      x1: cursor + extensao,
+      x0: eixo === "tempo" ? t0 : d0,
+      x1: eixo === "tempo" ? t1 : d1,
       zona: s.zona,
       rapidoSec: fz?.rapidoSec ?? null,
       lentoSec: fz?.lentoSec ?? null,
     });
-    cursor += extensao;
+
+    tCursor = t1;
+    dCursor = d1;
   }
   return out;
 }

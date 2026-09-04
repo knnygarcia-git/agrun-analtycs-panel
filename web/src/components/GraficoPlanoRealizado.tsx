@@ -43,7 +43,7 @@ export function GraficoPlanoRealizado({
     if (!pts.length) return null;
 
     const xMax = Math.max(...pts.map((p) => p.x), 1);
-    const bandas = faixaPlanejada(estrutura, faixas, eixo);
+    const bandas = faixaPlanejada(estrutura, faixas, eixo, serie);
     const bandaMax = bandas.length ? bandas[bandas.length - 1].x1 : 0;
 
     const paces = pts.map((p) => p.pace);
