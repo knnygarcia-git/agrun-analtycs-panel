@@ -14,7 +14,7 @@ const MODELO = "gemini-flash-lite-latest";
 const GEMINI_URL = (m: string) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
 
-const GROQ_MODELO = "llama-3.3-70b-versatile";
+const GROQ_MODELO = "openai/gpt-oss-120b";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const SYSTEM_PROMPT = `Você é um assistente que ajuda o coach da AGRUN (corrida de rua) a redigir RASCUNHOS de feedback de treino. O coach sempre revisa e edita antes de enviar.
