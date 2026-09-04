@@ -895,6 +895,25 @@ table.conf tbody tr.tr-avaliado:hover td {
   margin-right: 6px;
   vertical-align: middle;
 }
+/* % de melhora do primeiro teste até o mais recente (evolução do 3km) */
+.evolucao-pct {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 8px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+}
+.evolucao-pct.up {
+  color: var(--z2);
+}
+.evolucao-pct.down {
+  color: var(--z5);
+}
+.evolucao-pct.neutro {
+  color: var(--muted-2);
+}
 .section-gap {
   margin-top: 34px;
 }

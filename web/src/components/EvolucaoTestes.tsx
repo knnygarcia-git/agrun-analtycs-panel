@@ -22,6 +22,17 @@ function dominio(valores: number[]): [number, number] {
   return [vMin - folga, vMax + folga];
 }
 
+/** % de melhora entre o primeiro e o último teste — valor menor (mais
+ *  rápido) é evolução, então a % é (inicial - final) / inicial. */
+function formatoMelhora(inicial: number, final: number): { texto: string; classe: string } {
+  const pct = ((inicial - final) / inicial) * 100;
+  if (Math.abs(pct) < 0.05) return { texto: "0%", classe: "neutro" };
+  return {
+    texto: `${pct > 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(1)}%`,
+    classe: pct > 0 ? "up" : "down",
+  };
+}
+
 /** Gráfico único de evolução: tempo do teste (eixo esquerdo, verde) e FTP pace
  *  resultante (eixo direito, azul, tracejado) no mesmo plot, 1 ponto por
  *  teste, datas no eixo X. Y invertido nos dois — valor menor (mais rápido)
@@ -30,10 +41,12 @@ function EvolucaoChart({
   pontos,
   tituloTempo,
   tituloFtp,
+  tituloMelhora,
 }: {
   pontos: { data: string; tempo: number; ftp: number | null }[];
   tituloTempo: string;
   tituloFtp: string;
+  tituloMelhora: string;
 }) {
   const plotW = W - PAD_L - PAD_R;
   const plotH = H - PAD_T - PAD_B;
@@ -65,6 +78,15 @@ function EvolucaoChart({
           {tituloTempo}
           <div>
             {fmtSec(pontos[0].tempo)} → <b>{fmtSec(pontos[pontos.length - 1].tempo)}</b>
+            {pontos.length > 1 &&
+              (() => {
+                const m = formatoMelhora(pontos[0].tempo, pontos[pontos.length - 1].tempo);
+                return (
+                  <span className={`evolucao-pct ${m.classe}`} title={tituloMelhora}>
+                    {m.texto}
+                  </span>
+                );
+              })()}
           </div>
         </div>
         {domFtp && (
@@ -74,6 +96,15 @@ function EvolucaoChart({
             <div>
               {fmtSec(comFtp[0].ftp)}/km →{" "}
               <b>{fmtSec(comFtp[comFtp.length - 1].ftp)}/km</b>
+              {comFtp.length > 1 &&
+                (() => {
+                  const m = formatoMelhora(comFtp[0].ftp, comFtp[comFtp.length - 1].ftp);
+                  return (
+                    <span className={`evolucao-pct ${m.classe}`} title={tituloMelhora}>
+                      {m.texto}
+                    </span>
+                  );
+                })()}
             </div>
           </div>
         )}
@@ -363,6 +394,7 @@ export function EvolucaoTestes({ alunoId }: { alunoId: string }) {
               }))}
               tituloTempo={t("teste3km.chartTime")}
               tituloFtp={t("teste3km.chartFtp")}
+              tituloMelhora={t("teste3km.improvementTitle")}
             />
           </div>
         </>

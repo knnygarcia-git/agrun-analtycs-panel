@@ -387,6 +387,7 @@ export const pt = {
     "Nenhum teste de 3km registrado ainda. Registre o primeiro pra começar a acompanhar a evolução.",
   "teste3km.chartTime": "Tempo do teste",
   "teste3km.chartFtp": "FTP pace resultante",
+  "teste3km.improvementTitle": "Melhora do primeiro teste registrado até o mais recente",
   "teste3km.confirmarApagar": "Apagar este teste de 3km? Não dá pra desfazer.",
   "teste3km.erroCampos": "Preencha a data e o tempo do teste.",
   "teste3km.erroFtp": 'FTP pace inválido. Use M:SS (ex: "4:15").',
