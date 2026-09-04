@@ -2,6 +2,7 @@ import type { EtapaExecutada } from "@/types/database";
 import { fmtSec } from "@/lib/format";
 import { useT, type TKey } from "@/lib/i18n";
 import type { FitParsed } from "@/lib/fit/types";
+import { zonaPorOrdemDeVoltas } from "@/lib/fit/parse";
 import type { ResultadoCasamento, TreinoComCiclo } from "@/lib/fit/match";
 import { TabelaEtapas } from "@/components/TabelaEtapas";
 
@@ -87,6 +88,9 @@ export function ConferenciaFit({
       <div className="section-title" style={{ marginTop: 20 }}>
         {t("confFit.stageComparisonTitle")}
       </div>
+      {zonaPorOrdemDeVoltas(fit) && (
+        <div className="conf-banner aviso">{t("confFit.zoneByOrder")}</div>
+      )}
       {divergencias > 0 ? (
         <div className="conf-banner aviso">
           {divergencias === 1

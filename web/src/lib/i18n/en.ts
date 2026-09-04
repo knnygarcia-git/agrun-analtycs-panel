@@ -207,6 +207,8 @@ export const en: Record<keyof typeof pt, string> = {
   "confFit.stagesOutOfZone_other":
     "{count} stages fell outside the planned zone (highlighted below). Zone computed from the athlete's table, not the file.",
   "confFit.allInZone": "All stages fell within the planned zone.",
+  "confFit.zoneByOrder":
+    "This watch doesn't record the workout structure (common outside Garmin/TrainingPeaks) — each stage's planned zone was estimated from lap order, not a direct link from the file.",
 
   // stage names (code-generated, not from the spreadsheet)
   "etapa.warmup": "Warm-up",
@@ -343,6 +345,8 @@ export const en: Record<keyof typeof pt, string> = {
   // matching (match.ts) — reason
   "match.noCodeInFile":
     "Could not find a T01–T16 code in the file's workout name. Choose the workout manually.",
+  "match.noCodeGuessed":
+    "The watch didn't record the workout name (common outside Garmin/TrainingPeaks). Pre-selected {codigo} by date ({data}) and duration — check it's the right one before confirming.",
   "match.codeNoCycleCovers":
     "{codigo} exists in the athlete's plan, but no cycle covers the date {data}. Choose manually.",
   "match.noCodeInPlan":

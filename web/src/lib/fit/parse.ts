@@ -144,6 +144,15 @@ function lapsUteis(laps: LapBruto[]): { uteis: LapBruto[]; descartadas: number }
   return { uteis, descartadas: laps.length - uteis.length };
 }
 
+/** true quando o relógio não gravou vínculo com os passos do treino
+ *  estruturado (`wkt_step_index`) — comum fora do ecossistema
+ *  Garmin + TrainingPeaks. Nesse caso a zona planejada de cada etapa é
+ *  estimada pela ORDEM das voltas em vez do índice do passo. */
+export function zonaPorOrdemDeVoltas(fit: FitParsed): boolean {
+  const { uteis } = lapsUteis(fit.laps);
+  return uteis.length > 0 && uteis.every((l) => l.wktStepIndex == null);
+}
+
 export function calcularEtapas(
   fit: FitParsed,
   faixas: FaixaZona[],
@@ -151,6 +160,7 @@ export function calcularEtapas(
 ): EtapaExecutada[] {
   const { uteis: laps } = lapsUteis(fit.laps);
   const zonasPlano = zonasDaEstrutura(estruturaPlano);
+  const porOrdem = zonaPorOrdemDeVoltas(fit);
 
   // numeração "km N" / "resto" dentro de um grupo de laps do mesmo passo
   const contagemPorStep = new Map<number, number>();
@@ -163,7 +173,7 @@ export function calcularEtapas(
   }
   const kmContador = new Map<number, number>();
 
-  return laps.map((l) => {
+  return laps.map((l, indiceVolta) => {
     const recs = fit.records.filter(
       (r) => r.t >= l.inicio && r.t < l.fim,
     );
@@ -192,8 +202,11 @@ export function calcularEtapas(
       pacePiorSec = Math.round(Math.max(...pacesRec));
     }
 
-    const zonaPlanejada =
-      l.wktStepIndex != null ? (zonasPlano[l.wktStepIndex] ?? null) : null;
+    const zonaPlanejada = porOrdem
+      ? (zonasPlano[indiceVolta] ?? null)
+      : l.wktStepIndex != null
+        ? (zonasPlano[l.wktStepIndex] ?? null)
+        : null;
     const faixaPlano = faixaPorCodigo(zonaPlanejada, faixas);
     let pctNaFaixa: number | null = null;
     let posNaZona: number | null = null;

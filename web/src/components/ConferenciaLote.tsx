@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import type { Zona } from "@/types/database";
 import { fmtSec } from "@/lib/format";
 import { useT } from "@/lib/i18n";
-import { calcularEtapas } from "@/lib/fit/parse";
+import { calcularEtapas, zonaPorOrdemDeVoltas } from "@/lib/fit/parse";
 import { faixasDeZonas } from "@/lib/fit/zones";
 import type { FitParsed } from "@/lib/fit/types";
 import type { ResultadoCasamento } from "@/lib/fit/match";
@@ -45,6 +45,12 @@ function situacao(it: ItemLote, t: T): { texto: string; classe: string } {
     case "multiplos":
     case "pendente_revisao":
       return { texto: `${t("lote.reviewFirst")}${sufixo}`, classe: "aviso" };
+    case "sem_codigo":
+      // sem código no arquivo, mas casarTreino ainda pode ter pré-selecionado
+      // um palpite por data+duração — nesse caso é só revisar, não "sem plano"
+      return it.selecionadoId
+        ? { texto: `${t("lote.reviewFirst")}${sufixo}`, classe: "aviso" }
+        : { texto: t("lote.noPlanMatch"), classe: "aviso" };
     default:
       return { texto: t("lote.noPlanMatch"), classe: "aviso" };
   }
@@ -92,7 +98,12 @@ function DetalheItem({ it }: { it: ItemLote }) {
       {etapas.length === 0 ? (
         <div className="conf-note">{t("lote.noStages")}</div>
       ) : (
-        <TabelaEtapas etapas={etapas} wrapClassName="conf-table-wrap" />
+        <>
+          {zonaPorOrdemDeVoltas(it.fit) && (
+            <div className="conf-note">{t("confFit.zoneByOrder")}</div>
+          )}
+          <TabelaEtapas etapas={etapas} wrapClassName="conf-table-wrap" />
+        </>
       )}
     </div>
   );

@@ -208,6 +208,8 @@ export const pt = {
   "confFit.stagesOutOfZone_other":
     "{count} etapas caíram fora da zona planejada (destacadas abaixo). Zona calculada da tabela do aluno, não do arquivo.",
   "confFit.allInZone": "Todas as etapas caíram dentro da zona planejada.",
+  "confFit.zoneByOrder":
+    "Esse relógio não registra a estrutura do treino (comum fora do Garmin/TrainingPeaks) — a zona planejada de cada etapa foi estimada pela ordem das voltas, não por um vínculo direto do arquivo.",
 
   // nomes de etapa (gerados pelo código, não vêm da planilha)
   "etapa.warmup": "Aquecimento",
@@ -344,6 +346,8 @@ export const pt = {
   // casamento (match.ts) — motivo
   "match.noCodeInFile":
     "Não achei um código T01–T16 no nome do treino do arquivo. Escolha o treino manualmente.",
+  "match.noCodeGuessed":
+    "O relógio não gravou o nome do treino (comum fora do Garmin/TrainingPeaks). Pré-selecionei {codigo} pela data ({data}) e pela duração — confira se é esse mesmo antes de confirmar.",
   "match.codeNoCycleCovers":
     "Existe {codigo} no plano do aluno, mas nenhum ciclo cobre a data {data}. Escolha manualmente.",
   "match.noCodeInPlan": "Nenhum {codigo} no plano do aluno. Escolha manualmente.",

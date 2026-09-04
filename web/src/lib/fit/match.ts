@@ -71,9 +71,33 @@ export async function casarTreino(
   });
 
   if (!fit.codigo) {
+    // relógios sem integração TrainingPeaks/Garmin não gravam o nome do
+    // treino (workout) no .FIT — chuta pelo ciclo ativo na data + duração
+    // mais parecida, mas continua exigindo confirmação manual do coach.
+    const doDia = todos.filter(
+      (t) =>
+        t.ciclo.data_inicio <= fit.dataExecucao &&
+        t.ciclo.data_fim >= fit.dataExecucao,
+    );
+    if (doDia.length === 0) {
+      return base({
+        status: "sem_codigo",
+        motivoKey: "match.noCodeInFile",
+      });
+    }
+    const comDuracao = doDia.filter((t) => t.duracao_planejada_sec != null);
+    const candidatosDia = comDuracao.length ? comDuracao : doDia;
+    const ordenadosDia = [...candidatosDia].sort(
+      (a, b) => (diffDe(a) ?? 1) - (diffDe(b) ?? 1),
+    );
+    const palpite = ordenadosDia[0];
     return base({
       status: "sem_codigo",
-      motivoKey: "match.noCodeInFile",
+      motivoKey: "match.noCodeGuessed",
+      motivoParams: { codigo: palpite.codigo, data: fit.dataExecucao },
+      escolhido: palpite,
+      diffPct: diffDe(palpite),
+      zonas: await zonasDe(palpite.ciclo_id),
     });
   }
 
