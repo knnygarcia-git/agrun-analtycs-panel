@@ -7,6 +7,7 @@ import {
   zonasDaEstrutura,
   type FaixaZona,
 } from "./zones";
+import { extrairPausas, tempoMovimentoSec } from "./pausas";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -57,9 +58,14 @@ export async function parseFitResultado(buf: ArrayBuffer): Promise<FitParsed> {
     toDate((data.records ?? [])[0]?.timestamp) ??
     new Date();
 
+  // total_timer_time = tempo em movimento (sem pausas manuais do relógio) —
+  // é o que o plano de treino e o TrainingPeaks/Garmin Connect comparam.
+  // total_elapsed_time (relógio corrido) só entra se a lib não trouxer o timer.
   const duracaoRealSec = Math.round(
-    num(sessao.total_elapsed_time) ?? num(sessao.total_timer_time) ?? 0,
+    num(sessao.total_timer_time) ?? num(sessao.total_elapsed_time) ?? 0,
   );
+
+  const pausas = extrairPausas(data.events);
 
   const records: RecordBruto[] = (data.records ?? []).flatMap((r: any) => {
     const t = toDate(r.timestamp);
@@ -115,6 +121,7 @@ export async function parseFitResultado(buf: ArrayBuffer): Promise<FitParsed> {
     fcMediaSessao: num(sessao.avg_heart_rate),
     fcMaxSessao: num(sessao.max_heart_rate),
     esporte: sessao.sport ?? null,
+    pausas,
     laps,
     records,
   };
@@ -267,11 +274,16 @@ export function calcularEtapas(
       }
     }
 
+    // tempo em movimento (descontando pausas manuais do relógio) — bate com
+    // o "Voltas e Parciais" do TrainingPeaks/Garmin Connect. fim = início +
+    // duração da própria volta (já em tempo de timer, não corrido).
+    const inicioSec = tempoMovimentoSec(l.inicio, fit.inicio, fit.pausas);
+
     return {
       nome,
       wkt_step_index: l.wktStepIndex,
-      inicio_sec: Math.round((l.inicio.getTime() - fit.inicio.getTime()) / 1000),
-      fim_sec: Math.round((l.fim.getTime() - fit.inicio.getTime()) / 1000),
+      inicio_sec: inicioSec,
+      fim_sec: inicioSec + Math.round(l.durSec),
       dur_sec: Math.round(l.durSec),
       dist_m: Math.round(l.distM),
       pace_sec: paceSec,

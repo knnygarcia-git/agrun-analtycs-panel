@@ -1,5 +1,6 @@
 import type { FitParsed } from "./types";
 import { parseEstrutura } from "./estrutura";
+import { tempoMovimentoSec } from "./pausas";
 import type { FaixaZona } from "./zones";
 
 export interface PontoSerie {
@@ -16,14 +17,16 @@ const PACE_MAX = 900; // 15:00/km
 
 /** Série ponto-a-ponto para o gráfico, reduzida para ~`alvo` pontos. */
 export function construirSerie(fit: FitParsed, alvo = 480): PontoSerie[] {
-  const t0 = fit.inicio.getTime();
+  // tempo em movimento (descontando pausas manuais do relógio) — sem isso,
+  // uma parada no meio do treino "estica" tudo que vem depois no gráfico e
+  // desalinha a comparação com a faixa planejada.
   const todos: PontoSerie[] = fit.records.map((r) => {
     const paceSec =
       r.speedMs && r.speedMs > 0.4
         ? Math.min(PACE_MAX, Math.round(1000 / r.speedMs))
         : PACE_MAX;
     return {
-      t: Math.round((r.t.getTime() - t0) / 1000),
+      t: tempoMovimentoSec(r.t, fit.inicio, fit.pausas),
       dist: Math.round(r.distM),
       hr: r.hr,
       paceSec,

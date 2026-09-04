@@ -32,6 +32,12 @@ export interface RecordBruto {
   distM: number;
 }
 
+/** Intervalo em que o relógio ficou pausado (evento `timer` stop_all → start). */
+export interface PausaBruta {
+  inicio: Date;
+  fim: Date;
+}
+
 export interface FitParsed {
   /** código T01..T16 extraído do nome do treino */
   codigo: string | null;
@@ -47,6 +53,8 @@ export interface FitParsed {
   fcMaxSessao: number | null;
   /** session.sport cru do .FIT (ex: "running", "cycling", "training") */
   esporte: string | null;
+  /** trechos pausados manualmente (relógio parado) — ver lib/fit/pausas.ts */
+  pausas: PausaBruta[];
   laps: LapBruto[];
   records: RecordBruto[];
 }
