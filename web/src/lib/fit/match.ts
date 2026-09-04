@@ -31,6 +31,10 @@ const TOLERANCIA = 0.05; // 5% (seção 5)
 export async function casarTreino(
   fit: FitParsed,
   alunoId: string,
+  /** ids de treino_planejado já palpitados por outros arquivos deste MESMO
+   *  lote — evita sugerir o mesmo treino duas vezes quando dois arquivos
+   *  têm duração parecida (só entra na hora de CHUTAR, não em código exato). */
+  jaPalpitados: Set<string> = new Set(),
 ): Promise<ResultadoCasamento> {
   // todos os treinos do aluno (para escolha manual e para o fallback)
   const { data: todosRaw, error } = await supabase
@@ -107,7 +111,11 @@ export async function casarTreino(
         t.periodo_inicio <= fit.dataExecucao &&
         t.periodo_fim >= fit.dataExecucao,
     );
-    const pool = daSemana.length ? daSemana : candidatosDia;
+    const poolBase = daSemana.length ? daSemana : candidatosDia;
+    // evita repetir um treino já palpitado por outro arquivo deste lote
+    // (2 treinos com duração bem parecida não podem "chutar" o mesmo T0X)
+    const semRepetido = poolBase.filter((t) => !jaPalpitados.has(t.id));
+    const pool = semRepetido.length ? semRepetido : poolBase;
     const ordenadosDia = [...pool].sort(
       (a, b) => (diffDe(a) ?? 1) - (diffDe(b) ?? 1),
     );

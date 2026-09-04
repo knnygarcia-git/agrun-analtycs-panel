@@ -263,6 +263,9 @@ export const en: Record<keyof typeof pt, string> = {
   "lote.replaceSuffix": " · already exists, will replace",
   "lote.noPlanMatch": "no workout in the plan — choose or skip",
   "lote.notRunning": "not a run — skipped",
+  "lote.duplicateWarning":
+    "{count} rows are matched to the same plan workout — the last one would overwrite the previous one. Pick another workout or uncheck one of them before importing.",
+  "lote.duplicateInBatch": "duplicate in this batch — fix before importing",
   "lote.detailRealDuration": "Actual duration",
   "lote.detailPlanned": "Planned",
   "lote.detailDifference": "Difference",

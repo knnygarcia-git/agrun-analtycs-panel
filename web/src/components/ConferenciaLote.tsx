@@ -132,6 +132,22 @@ export function ConferenciaLote({
 
   const todos = itens[0]?.resultado.todos ?? [];
   const selecionaveis = itens.filter((it) => it.incluir && it.selecionadoId);
+
+  // 2+ linhas marcadas casadas com o MESMO treino do plano: a 2ª sobrescreveria
+  // a 1ª em silêncio na hora de importar (mesmo bug que já rolou 1x sem esse aviso)
+  const contagemPorTreino = new Map<string, number>();
+  for (const it of selecionaveis)
+    contagemPorTreino.set(
+      it.selecionadoId,
+      (contagemPorTreino.get(it.selecionadoId) ?? 0) + 1,
+    );
+  const treinosDuplicados = new Set(
+    [...contagemPorTreino.entries()].filter(([, n]) => n > 1).map(([id]) => id),
+  );
+  const linhasDuplicadas = selecionaveis.filter((it) =>
+    treinosDuplicados.has(it.selecionadoId),
+  ).length;
+
   const paraRevisar = itens.filter(
     (it) =>
       it.incluir &&
@@ -156,6 +172,12 @@ export function ConferenciaLote({
         {substituir === 1 && t("lote.summaryReplaceOne")}
         {substituir > 1 && t("lote.summaryReplaceMany", { count: substituir })}
       </div>
+
+      {linhasDuplicadas > 0 && (
+        <div className="conf-banner erro">
+          {t("lote.duplicateWarning", { count: linhasDuplicadas })}
+        </div>
+      )}
 
       {terminou && (
         <div className={`conf-banner ${falhas > 0 ? "aviso" : "ok"}`}>
@@ -186,10 +208,25 @@ export function ConferenciaLote({
             {itens.map((it, i) => {
               const sel = todos.find((x) => x.id === it.selecionadoId) ?? null;
               const planSec = sel?.duracao_planejada_sec ?? null;
-              const s = situacao(it, t);
+              const duplicado =
+                it.incluir &&
+                !!it.selecionadoId &&
+                treinosDuplicados.has(it.selecionadoId);
+              const s = duplicado
+                ? { texto: t("lote.duplicateInBatch"), classe: "erro" }
+                : situacao(it, t);
               const estaAberto = aberto === i;
               return [
-                <tr key={i} className={s.classe === "aviso" ? "sev-aviso" : ""}>
+                <tr
+                  key={i}
+                  className={
+                    s.classe === "erro"
+                      ? "sev-erro"
+                      : s.classe === "aviso"
+                        ? "sev-aviso"
+                        : ""
+                  }
+                >
                   <td>
                     <input
                       type="checkbox"
@@ -255,7 +292,9 @@ export function ConferenciaLote({
           <>
             <button
               className="btn btn-primary"
-              disabled={selecionaveis.length === 0 || salvando}
+              disabled={
+                selecionaveis.length === 0 || salvando || linhasDuplicadas > 0
+              }
               onClick={onImportar}
             >
               {salvando

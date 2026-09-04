@@ -264,6 +264,9 @@ export const pt = {
   "lote.replaceSuffix": " · já existe, vai substituir",
   "lote.noPlanMatch": "sem treino no plano — escolha ou pule",
   "lote.notRunning": "não é corrida — ignorado",
+  "lote.duplicateWarning":
+    "{count} linhas estão casadas com o mesmo treino do plano — a última sobrescreveria a anterior. Escolha outro treino ou desmarque uma delas antes de importar.",
+  "lote.duplicateInBatch": "duplicado neste lote — corrija antes de importar",
   "lote.detailRealDuration": "Duração real",
   "lote.detailPlanned": "Planejada",
   "lote.detailDifference": "Diferença",

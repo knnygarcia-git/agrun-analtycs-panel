@@ -96,12 +96,18 @@ export function ImportarFitPage() {
 
       // vários treinos → conferência em lote
       const itens: ItemLote[] = [];
+      // ids já palpitados por outro arquivo deste lote (sem código no
+      // arquivo) — passado adiante pra não sugerir o mesmo treino 2x
+      const palpitesUsados = new Set<string>();
       for (let k = 0; k < extraidos.length; k++) {
         const ex = extraidos[k];
         setProgresso({ i: k + 1, total: extraidos.length });
         await new Promise((r) => setTimeout(r, 0)); // deixa a UI repintar
         const parsed = await parseFitResultado(ex.bytes);
-        const r = await casarTreino(parsed, aluno.id);
+        const r = await casarTreino(parsed, aluno.id, palpitesUsados);
+        if (r.escolhido && r.motivoKey === "match.noCodeGuessed") {
+          palpitesUsados.add(r.escolhido.id);
+        }
         itens.push({
           nome: ex.nome,
           bytes: ex.bytes,
