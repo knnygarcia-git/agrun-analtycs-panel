@@ -262,6 +262,7 @@ export const en: Record<keyof typeof pt, string> = {
   "lote.reviewFirst": "review first",
   "lote.replaceSuffix": " · already exists, will replace",
   "lote.noPlanMatch": "no workout in the plan — choose or skip",
+  "lote.notRunning": "not a run — skipped",
   "lote.detailRealDuration": "Actual duration",
   "lote.detailPlanned": "Planned",
   "lote.detailDifference": "Difference",
@@ -347,6 +348,10 @@ export const en: Record<keyof typeof pt, string> = {
     "Could not find a T01–T16 code in the file's workout name. Choose the workout manually.",
   "match.noCodeGuessed":
     "The watch didn't record the workout name (common outside Garmin/TrainingPeaks). Pre-selected {codigo} by date ({data}) and duration — check it's the right one before confirming.",
+  "match.notRunning":
+    "This activity isn't a run (sport: {esporte}) — not auto-matching it to a plan workout.",
+  "match.noCodeNoGoodGuess":
+    "Couldn't find a plan workout with a similar duration to this file (might be an extra jog outside the plan). Choose manually if you want to link it to one.",
   "match.codeNoCycleCovers":
     "{codigo} exists in the athlete's plan, but no cycle covers the date {data}. Choose manually.",
   "match.noCodeInPlan":

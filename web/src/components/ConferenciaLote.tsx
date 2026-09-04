@@ -46,6 +46,9 @@ function situacao(it: ItemLote, t: T): { texto: string; classe: string } {
     case "pendente_revisao":
       return { texto: `${t("lote.reviewFirst")}${sufixo}`, classe: "aviso" };
     case "sem_codigo":
+      if (it.resultado.motivoKey === "match.notRunning") {
+        return { texto: t("lote.notRunning"), classe: "" };
+      }
       // sem código no arquivo, mas casarTreino ainda pode ter pré-selecionado
       // um palpite por data+duração — nesse caso é só revisar, não "sem plano"
       return it.selecionadoId

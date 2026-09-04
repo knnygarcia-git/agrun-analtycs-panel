@@ -263,6 +263,7 @@ export const pt = {
   "lote.reviewFirst": "revisar antes",
   "lote.replaceSuffix": " · já existe, vai substituir",
   "lote.noPlanMatch": "sem treino no plano — escolha ou pule",
+  "lote.notRunning": "não é corrida — ignorado",
   "lote.detailRealDuration": "Duração real",
   "lote.detailPlanned": "Planejada",
   "lote.detailDifference": "Diferença",
@@ -348,6 +349,10 @@ export const pt = {
     "Não achei um código T01–T16 no nome do treino do arquivo. Escolha o treino manualmente.",
   "match.noCodeGuessed":
     "O relógio não gravou o nome do treino (comum fora do Garmin/TrainingPeaks). Pré-selecionei {codigo} pela data ({data}) e pela duração — confira se é esse mesmo antes de confirmar.",
+  "match.notRunning":
+    "Essa atividade não é corrida (esporte: {esporte}) — não tenta casar sozinha com nenhum treino do plano.",
+  "match.noCodeNoGoodGuess":
+    "Não achei nenhum treino do plano com duração parecida com esse arquivo (pode ser um trote avulso, fora do plano). Escolha manualmente se quiser vincular a um treino.",
   "match.codeNoCycleCovers":
     "Existe {codigo} no plano do aluno, mas nenhum ciclo cobre a data {data}. Escolha manualmente.",
   "match.noCodeInPlan": "Nenhum {codigo} no plano do aluno. Escolha manualmente.",

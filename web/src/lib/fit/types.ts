@@ -45,6 +45,8 @@ export interface FitParsed {
   distanciaTotalM: number;
   fcMediaSessao: number | null;
   fcMaxSessao: number | null;
+  /** session.sport cru do .FIT (ex: "running", "cycling", "training") */
+  esporte: string | null;
   laps: LapBruto[];
   records: RecordBruto[];
 }

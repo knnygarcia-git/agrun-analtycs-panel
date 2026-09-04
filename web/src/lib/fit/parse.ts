@@ -114,6 +114,7 @@ export async function parseFitResultado(buf: ArrayBuffer): Promise<FitParsed> {
     distanciaTotalM: Math.round(num(sessao.total_distance) ?? 0),
     fcMediaSessao: num(sessao.avg_heart_rate),
     fcMaxSessao: num(sessao.max_heart_rate),
+    esporte: sessao.sport ?? null,
     laps,
     records,
   };

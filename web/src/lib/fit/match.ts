@@ -71,6 +71,16 @@ export async function casarTreino(
   });
 
   if (!fit.codigo) {
+    // atividade claramente não-corrida (cross-training, força, bike...) —
+    // não arrisca chutar um treino de corrida da planilha pra ela.
+    if (fit.esporte != null && fit.esporte !== "running") {
+      return base({
+        status: "sem_codigo",
+        motivoKey: "match.notRunning",
+        motivoParams: { esporte: fit.esporte },
+      });
+    }
+
     // relógios sem integração TrainingPeaks/Garmin não gravam o nome do
     // treino (workout) no .FIT — chuta pelo ciclo ativo na data + duração
     // mais parecida, mas continua exigindo confirmação manual do coach.
@@ -87,16 +97,37 @@ export async function casarTreino(
     }
     const comDuracao = doDia.filter((t) => t.duracao_planejada_sec != null);
     const candidatosDia = comDuracao.length ? comDuracao : doDia;
-    const ordenadosDia = [...candidatosDia].sort(
+    // prioriza treinos cuja SEMANA (período da planilha) cobre a data —
+    // sem isso, um treino de outra semana com duração parecida por
+    // coincidência pode ganhar de um da semana certa.
+    const daSemana = candidatosDia.filter(
+      (t) =>
+        t.periodo_inicio != null &&
+        t.periodo_fim != null &&
+        t.periodo_inicio <= fit.dataExecucao &&
+        t.periodo_fim >= fit.dataExecucao,
+    );
+    const pool = daSemana.length ? daSemana : candidatosDia;
+    const ordenadosDia = [...pool].sort(
       (a, b) => (diffDe(a) ?? 1) - (diffDe(b) ?? 1),
     );
     const palpite = ordenadosDia[0];
+    const diffPalpite = diffDe(palpite);
+    // mesmo o melhor candidato bate muito longe da duração real (>50%) —
+    // mais provável ser um trote avulso / atividade fora do plano do que
+    // um treino real; não força um palpite ruim.
+    if (diffPalpite != null && diffPalpite > 0.5) {
+      return base({
+        status: "sem_codigo",
+        motivoKey: "match.noCodeNoGoodGuess",
+      });
+    }
     return base({
       status: "sem_codigo",
       motivoKey: "match.noCodeGuessed",
       motivoParams: { codigo: palpite.codigo, data: fit.dataExecucao },
       escolhido: palpite,
-      diffPct: diffDe(palpite),
+      diffPct: diffPalpite,
       zonas: await zonasDe(palpite.ciclo_id),
     });
   }
