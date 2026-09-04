@@ -14,6 +14,7 @@ export const en: Record<keyof typeof pt, string> = {
   "common.dangerZone": "Danger zone",
   "common.none": "Select…",
   "common.dash": "—",
+  "common.delete": "Delete",
 
   // nav / sidebar
   "nav.subtitle": "Workout feedback review",
@@ -370,4 +371,20 @@ export const en: Record<keyof typeof pt, string> = {
   "match.autoOk": "{codigo} · duration matches within {tol}% ({diff}%).",
   "match.durationDiverges":
     "{codigo} matched by date, but the duration diverges {diff}% from the plan. It may be another workout with a similar name — confirm before processing.",
+
+  // evolution — 3km test
+  "teste3km.title": "Evolution — 3km test",
+  "teste3km.addNew": "+ New test",
+  "teste3km.date": "Date",
+  "teste3km.time": "Time (M:SS)",
+  "teste3km.ftpResult": "FTP pace (M:SS/km)",
+  "teste3km.notes": "Notes",
+  "teste3km.notesPlaceholder": "strong wind, wet track, etc.",
+  "teste3km.empty":
+    "No 3km test recorded yet. Add the first one to start tracking progress.",
+  "teste3km.chartTime": "Test time",
+  "teste3km.chartFtp": "Resulting FTP pace",
+  "teste3km.confirmarApagar": "Delete this 3km test? This cannot be undone.",
+  "teste3km.erroCampos": "Fill in the date and the test time.",
+  "teste3km.erroFtp": 'Invalid FTP pace. Use M:SS (e.g. "4:15").',
 };

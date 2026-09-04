@@ -155,6 +155,19 @@ export type Feedback = {
   enviado_em: string | null;
 };
 
+/** Histórico do teste de 3km (esforço máximo) do aluno — não é por ciclo. */
+export type Teste3km = {
+  id: string;
+  aluno_id: string;
+  data_teste: string;
+  /** tempo total dos 3km, em segundos */
+  tempo_sec: number;
+  /** pace de limiar (FTP) resultante, em segundos por km */
+  ftp_pace_sec: number | null;
+  observacoes: string | null;
+  criado_em: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -187,6 +200,14 @@ export type Database = {
         Feedback,
         Omit<Feedback, "id"> & { id?: string },
         Partial<Feedback>
+      >;
+      teste_3km: Table<
+        Teste3km,
+        Omit<Teste3km, "id" | "criado_em"> & {
+          id?: string;
+          criado_em?: string;
+        },
+        Partial<Teste3km>
       >;
     };
     Views: Record<string, never>;

@@ -11,6 +11,7 @@ import type {
 } from "@/types/database";
 import { fmtSec } from "@/lib/format";
 import { useT } from "@/lib/i18n";
+import { EvolucaoTestes } from "@/components/EvolucaoTestes";
 
 type ExecComFb = TreinoExecutado & {
   feedback:
@@ -131,6 +132,8 @@ export function AlunoDetalhePage() {
           </Link>
         </div>
       </div>
+
+      <EvolucaoTestes alunoId={aluno.id} />
 
       {ciclos.length === 0 ? (
         <div className="placeholder-box">

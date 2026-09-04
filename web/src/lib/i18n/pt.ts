@@ -15,6 +15,7 @@ export const pt = {
   "common.dangerZone": "Zona de perigo",
   "common.none": "Selecione…",
   "common.dash": "—",
+  "common.delete": "Apagar",
 
   // navegação / sidebar
   "nav.subtitle": "Painel de revisão de treinos",
@@ -371,6 +372,22 @@ export const pt = {
     "{codigo} · duração bate dentro de {tol}% ({diff}%).",
   "match.durationDiverges":
     "{codigo} casou por data, mas a duração diverge {diff}% do planejado. Pode ser outro treino de nome parecido — confirme antes de processar.",
+
+  // evolução — teste de 3km
+  "teste3km.title": "Evolução — teste de 3km",
+  "teste3km.addNew": "+ Novo teste",
+  "teste3km.date": "Data",
+  "teste3km.time": "Tempo (M:SS)",
+  "teste3km.ftpResult": "FTP pace (M:SS/km)",
+  "teste3km.notes": "Observações",
+  "teste3km.notesPlaceholder": "vento forte, pista molhada, etc.",
+  "teste3km.empty":
+    "Nenhum teste de 3km registrado ainda. Registre o primeiro pra começar a acompanhar a evolução.",
+  "teste3km.chartTime": "Tempo do teste",
+  "teste3km.chartFtp": "FTP pace resultante",
+  "teste3km.confirmarApagar": "Apagar este teste de 3km? Não dá pra desfazer.",
+  "teste3km.erroCampos": "Preencha a data e o tempo do teste.",
+  "teste3km.erroFtp": 'FTP pace inválido. Use M:SS (ex: "4:15").',
 } as const;
 
 export type TKey = keyof typeof pt;
