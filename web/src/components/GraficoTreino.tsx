@@ -24,6 +24,8 @@ interface Serie {
   valorDe: (p: PontoSerie) => number | null;
   dominio: [number, number];
   inverter?: boolean; // true: valor menor em baixo (FC); false: valor menor em cima (pace)
+  /** cor única pra linha inteira (ex: altitude) em vez de colorir por zona de pace */
+  corFixa?: string;
 }
 
 function Painel({
@@ -93,12 +95,12 @@ function Painel({
         y1: y(va),
         x2: x(b.t),
         y2: y(vb),
-        cor: (z && COR_ZONA[z]) || "#8B94A3",
+        cor: cfg.corFixa ?? ((z && COR_ZONA[z]) || "#8B94A3"),
       });
     }
     return segs;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serie, faixas, dMin, dMax]);
+  }, [serie, faixas, dMin, dMax, cfg.corFixa]);
 
   const ticks = [dMin, (dMin + dMax) / 2, dMax];
 
@@ -205,6 +207,8 @@ export function GraficoTreino({
   const t = useT();
   const paces = serie.map((p) => p.paceSec).filter((x): x is number => x != null);
   const hrs = serie.map((p) => p.hr).filter((x): x is number => x != null);
+  const cads = serie.map((p) => p.cad).filter((x): x is number => x != null);
+  const alts = serie.map((p) => p.alt).filter((x): x is number => x != null);
 
   if (!paces.length && !hrs.length) {
     return (
@@ -220,6 +224,10 @@ export function GraficoTreino({
   const paceMax = Math.max(...paces);
   const hrMin = Math.min(...hrs);
   const hrMax = Math.max(...hrs);
+  const cadMin = cads.length ? Math.min(...cads) : 0;
+  const cadMax = cads.length ? Math.max(...cads) : 0;
+  const altMin = alts.length ? Math.min(...alts) : 0;
+  const altMax = alts.length ? Math.max(...alts) : 0;
 
   return (
     <div className="grafico-card">
@@ -263,6 +271,51 @@ export function GraficoTreino({
         fmtTick={(v) => `${Math.round(v)}`}
         fmtHover={(v) => `${Math.round(v)} ${t("grafico.bpm")}`}
       />
+      {cads.length > 0 && (
+        <Painel
+          serie={serie}
+          faixas={faixas}
+          titulo={t("grafico.cadence")}
+          cfg={{
+            valorDe: (p) => p.cad,
+            dominio: [cadMin - 4, cadMax + 4],
+            inverter: true,
+          }}
+          linhasStat={[
+            { rot: t("grafico.max"), val: `${cadMax} ${t("grafico.spm")}` },
+            {
+              rot: t("grafico.avg"),
+              val: `${Math.round(cads.reduce((a, b) => a + b, 0) / cads.length)} ${t("grafico.spm")}`,
+            },
+            { rot: t("grafico.min"), val: `${cadMin} ${t("grafico.spm")}` },
+          ]}
+          fmtTick={(v) => `${Math.round(v)}`}
+          fmtHover={(v) => `${Math.round(v)} ${t("grafico.spm")}`}
+        />
+      )}
+      {alts.length > 0 && (
+        <Painel
+          serie={serie}
+          faixas={faixas}
+          titulo={t("grafico.altitude")}
+          cfg={{
+            valorDe: (p) => p.alt,
+            dominio: [altMin - 2, altMax + 2],
+            inverter: true,
+            corFixa: "#8B94A3",
+          }}
+          linhasStat={[
+            { rot: t("grafico.max"), val: `${Math.round(altMax)} ${t("grafico.meters")}` },
+            {
+              rot: t("grafico.avg"),
+              val: `${Math.round(alts.reduce((a, b) => a + b, 0) / alts.length)} ${t("grafico.meters")}`,
+            },
+            { rot: t("grafico.min"), val: `${Math.round(altMin)} ${t("grafico.meters")}` },
+          ]}
+          fmtTick={(v) => `${Math.round(v)}`}
+          fmtHover={(v) => `${Math.round(v)} ${t("grafico.meters")}`}
+        />
+      )}
     </div>
   );
 }

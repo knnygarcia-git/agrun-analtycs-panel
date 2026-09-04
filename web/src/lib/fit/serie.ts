@@ -11,6 +11,10 @@ export interface PontoSerie {
   hr: number | null;
   /** pace em s/km (limitado a 15:00 para não explodir a escala em paradas) */
   paceSec: number | null;
+  /** cadência em passadas/min (já com o fator ×2 — seção 4) */
+  cad: number | null;
+  /** altitude em metros */
+  alt: number | null;
 }
 
 const PACE_MAX = 900; // 15:00/km
@@ -30,25 +34,29 @@ export function construirSerie(fit: FitParsed, alvo = 480): PontoSerie[] {
       dist: Math.round(r.distM),
       hr: r.hr,
       paceSec,
+      cad: r.cad != null ? Math.round((r.cad + r.fracCad) * 2) : null,
+      alt: r.altM,
     };
   });
 
   if (todos.length <= alvo) return todos;
 
   // média por janela (mantém a forma, tira o ruído segundo-a-segundo)
+  const media = (xs: (number | null)[]) => {
+    const vs = xs.filter((x): x is number => x != null);
+    return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : null;
+  };
   const janela = Math.ceil(todos.length / alvo);
   const out: PontoSerie[] = [];
   for (let i = 0; i < todos.length; i += janela) {
     const bloco = todos.slice(i, i + janela);
-    const hrs = bloco.map((p) => p.hr).filter((x): x is number => x != null);
-    const paces = bloco.map((p) => p.paceSec).filter((x): x is number => x != null);
     out.push({
       t: bloco[0].t,
       dist: bloco[0].dist,
-      hr: hrs.length ? Math.round(hrs.reduce((a, b) => a + b, 0) / hrs.length) : null,
-      paceSec: paces.length
-        ? Math.round(paces.reduce((a, b) => a + b, 0) / paces.length)
-        : null,
+      hr: media(bloco.map((p) => p.hr)),
+      paceSec: media(bloco.map((p) => p.paceSec)),
+      cad: media(bloco.map((p) => p.cad)),
+      alt: media(bloco.map((p) => p.alt)),
     });
   }
   return out;
