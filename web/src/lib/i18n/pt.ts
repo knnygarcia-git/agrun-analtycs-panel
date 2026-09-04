@@ -374,7 +374,7 @@ export const pt = {
     "{codigo} casou por data, mas a duração diverge {diff}% do planejado. Pode ser outro treino de nome parecido — confirme antes de processar.",
 
   // evolução — teste de 3km
-  "teste3km.title": "Evolução — teste de 3km",
+  "teste3km.title": "Evolução - Teste de 3km",
   "teste3km.addNew": "+ Novo teste",
   "teste3km.date": "Data",
   "teste3km.time": "Tempo (M:SS)",

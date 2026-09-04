@@ -400,6 +400,39 @@
   color: var(--z5);
   border-left-color: var(--z5);
 }
+/* seção que pode ser recolhida — reduz o scroll em páginas longas */
+.secao-colapsavel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.secao-colapsavel-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 4px 6px 4px 2px;
+  margin: -4px 0 -4px -2px;
+  cursor: pointer;
+  text-align: left;
+  border-radius: var(--radius);
+}
+.secao-colapsavel-toggle:hover {
+  background: var(--panel-2);
+}
+.secao-colapsavel-seta {
+  display: inline-block;
+  color: var(--muted-2);
+  font-size: 11px;
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.secao-colapsavel-seta.aberta {
+  transform: rotate(90deg);
+}
 .placeholder-box {
   border: 1px dashed var(--line);
   padding: 40px 24px;

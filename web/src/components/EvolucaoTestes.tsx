@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import type { Teste3km } from "@/types/database";
 import { fmtSec, parseTempo } from "@/lib/format";
 import { useT } from "@/lib/i18n";
+import { SecaoColapsavel } from "@/components/SecaoColapsavel";
 
 const W = 640;
 const H = 150;
@@ -238,27 +239,18 @@ export function EvolucaoTestes({ alunoId }: { alunoId: string }) {
   if (carregando) return null;
 
   return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 12,
-          marginTop: 28,
-          marginBottom: 14,
-        }}
-      >
-        <div className="section-title" style={{ marginBottom: 0 }}>
-          {t("teste3km.title")}
-        </div>
-        {!mostrarForm && (
+    <SecaoColapsavel
+      chave="aluno.evolucao3km"
+      titulo={t("teste3km.title")}
+      style={{ marginTop: 28 }}
+      acoes={
+        !mostrarForm && (
           <button className="btn btn-ghost" onClick={abrirForm}>
             {t("teste3km.addNew")}
           </button>
-        )}
-      </div>
-
+        )
+      }
+    >
       {mostrarForm && (
         <form className="form-narrow" onSubmit={salvar} style={{ marginBottom: 18 }}>
           {erro && <div className="form-msg-erro">{erro}</div>}
@@ -375,6 +367,6 @@ export function EvolucaoTestes({ alunoId }: { alunoId: string }) {
           </div>
         </>
       )}
-    </div>
+    </SecaoColapsavel>
   );
 }

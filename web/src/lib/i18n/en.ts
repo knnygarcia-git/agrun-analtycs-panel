@@ -373,7 +373,7 @@ export const en: Record<keyof typeof pt, string> = {
     "{codigo} matched by date, but the duration diverges {diff}% from the plan. It may be another workout with a similar name — confirm before processing.",
 
   // evolution — 3km test
-  "teste3km.title": "Evolution — 3km test",
+  "teste3km.title": "Evolution - 3km Test",
   "teste3km.addNew": "+ New test",
   "teste3km.date": "Date",
   "teste3km.time": "Time (M:SS)",

@@ -12,6 +12,7 @@ import type {
 import { fmtSec } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { EvolucaoTestes } from "@/components/EvolucaoTestes";
+import { SecaoColapsavel } from "@/components/SecaoColapsavel";
 
 type ExecComFb = TreinoExecutado & {
   feedback:
@@ -182,55 +183,60 @@ export function AlunoDetalhePage() {
             </div>
           )}
 
-          <div className="section-title" style={{ marginTop: 22 }}>
-            {t("aluno.zonesTitle")}
-          </div>
-          <div className="conf-table-wrap">
-            <table className="conf">
-              <thead>
-                <tr>
-                  <th>{t("aluno.colZone")}</th>
-                  <th>{t("aluno.colFast")}</th>
-                  <th>{t("aluno.colSlow")}</th>
-                  <th>{t("aluno.colDescription")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {zonas.map((z) => (
-                  <tr key={z.id}>
-                    <td>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: 9,
-                          height: 9,
-                          borderRadius: "50%",
-                          background: COR_ZONA[z.codigo],
-                          marginRight: 7,
-                        }}
-                      />
-                      {z.codigo}
-                    </td>
-                    <td className="num">
-                      {z.pace_rapido_sec
-                        ? fmtSec(z.pace_rapido_sec)
-                        : t("aluno.max")}
-                    </td>
-                    <td className="num">
-                      {z.pace_lento_sec ? fmtSec(z.pace_lento_sec) : "—"}
-                    </td>
-                    <td className="livre" style={{ color: "var(--muted)" }}>
-                      {z.descricao ?? ""}
-                    </td>
+          <SecaoColapsavel
+            chave="aluno.zonas"
+            titulo={t("aluno.zonesTitle")}
+            style={{ marginTop: 22 }}
+          >
+            <div className="conf-table-wrap">
+              <table className="conf">
+                <thead>
+                  <tr>
+                    <th>{t("aluno.colZone")}</th>
+                    <th>{t("aluno.colFast")}</th>
+                    <th>{t("aluno.colSlow")}</th>
+                    <th>{t("aluno.colDescription")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {zonas.map((z) => (
+                    <tr key={z.id}>
+                      <td>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: 9,
+                            height: 9,
+                            borderRadius: "50%",
+                            background: COR_ZONA[z.codigo],
+                            marginRight: 7,
+                          }}
+                        />
+                        {z.codigo}
+                      </td>
+                      <td className="num">
+                        {z.pace_rapido_sec
+                          ? fmtSec(z.pace_rapido_sec)
+                          : t("aluno.max")}
+                      </td>
+                      <td className="num">
+                        {z.pace_lento_sec ? fmtSec(z.pace_lento_sec) : "—"}
+                      </td>
+                      <td className="livre" style={{ color: "var(--muted)" }}>
+                        {z.descricao ?? ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </SecaoColapsavel>
 
-          <div className="section-title" style={{ marginTop: 22 }}>
-            {t("aluno.cycleWorkoutsTitle", { count: treinos.length })}
-          </div>
+          <SecaoColapsavel
+            chave="aluno.treinos"
+            titulo={t("aluno.cycleWorkoutsTitle", { count: treinos.length })}
+            style={{ marginTop: 22 }}
+          >
           <div className="conf-table-wrap">
             <table className="conf">
               <thead>
@@ -304,6 +310,7 @@ export function AlunoDetalhePage() {
               </tbody>
             </table>
           </div>
+          </SecaoColapsavel>
         </>
       )}
     </>
