@@ -26,6 +26,8 @@ export const pt = {
   "nav.loadError": "Erro ao carregar: {msg}",
   "nav.noAthletes": "Nenhum aluno cadastrado ainda.",
   "nav.language": "Idioma",
+  "nav.openMenu": "Abrir menu",
+  "nav.closeMenu": "Fechar menu",
 
   // login
   "login.subtitle": "Painel de revisão de treinos",

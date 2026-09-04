@@ -8,6 +8,7 @@ import {
   IconeNovoAluno,
   IconeImportarPlanilha,
   IconeImportarFit,
+  IconeMenu,
 } from "@/components/icons";
 
 function iniciais(nome: string): string {
@@ -26,6 +27,7 @@ export function AppShell() {
   const location = useLocation();
   const [alunos, setAlunos] = useState<Aluno[]>([]);
   const [erro, setErro] = useState<string | null>(null);
+  const [menuAberto, setMenuAberto] = useState(false);
 
   // re-busca ao trocar de rota, para a lista refletir um aluno recém-criado/editado
   useEffect(() => {
@@ -39,9 +41,31 @@ export function AppShell() {
       });
   }, [location.pathname]);
 
+  // fecha o menu off-canvas (tablet/celular) sempre que a rota muda
+  useEffect(() => {
+    setMenuAberto(false);
+  }, [location.pathname]);
+
   return (
     <div className="app-shell">
-      <aside className="sidebar">
+      <div className="topbar">
+        <button
+          type="button"
+          className="topbar-menu-btn"
+          onClick={() => setMenuAberto(true)}
+          aria-label={t("nav.openMenu")}
+        >
+          <IconeMenu />
+        </button>
+        <img className="topbar-logo" src="/logo/agrun-branco.png" alt="AGRUN" />
+      </div>
+
+      <div
+        className={"sidebar-backdrop" + (menuAberto ? " visivel" : "")}
+        onClick={() => setMenuAberto(false)}
+      />
+
+      <aside className={"sidebar" + (menuAberto ? " aberta" : "")}>
         <div className="sidebar-brand">
           <Link to="/">
             <img className="brand-logo" src="/logo/agrun-branco.png" alt="AGRUN" width={128} />

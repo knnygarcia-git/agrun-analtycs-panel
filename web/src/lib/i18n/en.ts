@@ -25,6 +25,8 @@ export const en: Record<keyof typeof pt, string> = {
   "nav.loadError": "Failed to load: {msg}",
   "nav.noAthletes": "No athletes yet.",
   "nav.language": "Language",
+  "nav.openMenu": "Open menu",
+  "nav.closeMenu": "Close menu",
 
   // login
   "login.subtitle": "Workout feedback review",
