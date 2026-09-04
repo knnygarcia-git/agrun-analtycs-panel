@@ -5,81 +5,139 @@ import { fmtSec, parseTempo } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 
 const W = 640;
-const H = 120;
+const H = 150;
 const PAD_L = 46;
-const PAD_R = 14;
+const PAD_R = 46;
 const PAD_T = 14;
 const PAD_B = 22;
 
-/** Mini-gráfico de evolução: 1 linha, poucos pontos (1 por teste), datas no eixo X.
- *  Y invertido — valor menor (mais rápido) fica mais alto, mesma convenção
- *  usada nos gráficos de treino (melhor desempenho = mais em cima). */
-function MiniEvolucao({
-  titulo,
-  pontos,
-  fmtValor,
-  cor,
-}: {
-  titulo: string;
-  pontos: { data: string; valor: number }[];
-  fmtValor: (v: number) => string;
-  cor: string;
-}) {
-  const plotW = W - PAD_L - PAD_R;
-  const plotH = H - PAD_T - PAD_B;
-  const valores = pontos.map((p) => p.valor);
+const COR_TEMPO = "#7BD88F";
+const COR_FTP = "#4C8CFF";
+
+function dominio(valores: number[]): [number, number] {
   const vMin = Math.min(...valores);
   const vMax = Math.max(...valores);
   const folga = vMax === vMin ? Math.max(10, vMin * 0.05) : (vMax - vMin) * 0.2;
-  const dom: [number, number] = [vMin - folga, vMax + folga];
+  return [vMin - folga, vMax + folga];
+}
+
+/** Gráfico único de evolução: tempo do teste (eixo esquerdo, verde) e FTP pace
+ *  resultante (eixo direito, azul, tracejado) no mesmo plot, 1 ponto por
+ *  teste, datas no eixo X. Y invertido nos dois — valor menor (mais rápido)
+ *  fica mais alto, mesma convenção dos gráficos de treino. */
+function EvolucaoChart({
+  pontos,
+  tituloTempo,
+  tituloFtp,
+}: {
+  pontos: { data: string; tempo: number; ftp: number | null }[];
+  tituloTempo: string;
+  tituloFtp: string;
+}) {
+  const plotW = W - PAD_L - PAD_R;
+  const plotH = H - PAD_T - PAD_B;
+  const comFtp = pontos
+    .map((p, i) => ({ i, data: p.data, ftp: p.ftp }))
+    .filter((p): p is { i: number; data: string; ftp: number } => p.ftp != null);
+
+  const domTempo = dominio(pontos.map((p) => p.tempo));
+  const domFtp = comFtp.length ? dominio(comFtp.map((p) => p.ftp)) : null;
 
   const sx = (i: number) =>
     pontos.length <= 1 ? PAD_L + plotW / 2 : PAD_L + (i / (pontos.length - 1)) * plotW;
-  const sy = (v: number) =>
-    PAD_T + (1 - (v - dom[0]) / (dom[1] - dom[0] || 1)) * plotH;
+  const syTempo = (v: number) =>
+    PAD_T + (1 - (v - domTempo[0]) / (domTempo[1] - domTempo[0] || 1)) * plotH;
+  const syFtp = (v: number) =>
+    domFtp ? PAD_T + (1 - (v - domFtp[0]) / (domFtp[1] - domFtp[0] || 1)) * plotH : 0;
 
-  const linha = pontos.map((p, i) => `${sx(i).toFixed(1)},${sy(p.valor).toFixed(1)}`).join(" ");
-  const ticksY = [dom[0], (dom[0] + dom[1]) / 2, dom[1]];
+  const linhaTempo = pontos.map((p, i) => `${sx(i).toFixed(1)},${syTempo(p.tempo).toFixed(1)}`).join(" ");
+  const linhaFtp = comFtp.map((p) => `${sx(p.i).toFixed(1)},${syFtp(p.ftp).toFixed(1)}`).join(" ");
+
+  const ticksTempo = [domTempo[0], (domTempo[0] + domTempo[1]) / 2, domTempo[1]];
+  const ticksFtp = domFtp ? [domFtp[0], (domFtp[0] + domFtp[1]) / 2, domFtp[1]] : [];
 
   return (
     <div className="grafico-row">
       <div className="grafico-stats">
-        <div className="display">{titulo}</div>
         <div className="stat-line">
-          {fmtValor(pontos[0].valor)} → <b>{fmtValor(pontos[pontos.length - 1].valor)}</b>
+          <i className="grafico-dot" style={{ background: COR_TEMPO }} />
+          {tituloTempo}
+          <div>
+            {fmtSec(pontos[0].tempo)} → <b>{fmtSec(pontos[pontos.length - 1].tempo)}</b>
+          </div>
         </div>
+        {domFtp && (
+          <div className="stat-line" style={{ marginTop: 10 }}>
+            <i className="grafico-dot" style={{ background: COR_FTP }} />
+            {tituloFtp}
+            <div>
+              {fmtSec(comFtp[0].ftp)}/km →{" "}
+              <b>{fmtSec(comFtp[comFtp.length - 1].ftp)}/km</b>
+            </div>
+          </div>
+        )}
       </div>
-      <div className="grafico-canvas">
-        {ticksY.map((tk, i) => (
-          <span key={i} className="grafico-tick" style={{ top: `calc(10px + ${sy(tk)}px)` }}>
-            {fmtValor(tk)}
+      <div className="grafico-canvas grande">
+        {ticksTempo.map((tk, i) => (
+          <span
+            key={`t${i}`}
+            className="grafico-tick"
+            style={{ top: `calc(10px + ${syTempo(tk)}px)`, color: COR_TEMPO }}
+          >
+            {fmtSec(tk)}
           </span>
         ))}
-        <svg className="grafico-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-          {ticksY.map((tk, i) => (
+        {ticksFtp.map((tk, i) => (
+          <span
+            key={`f${i}`}
+            className="grafico-tick-right"
+            style={{ top: `calc(10px + ${syFtp(tk)}px)`, color: COR_FTP }}
+          >
+            {fmtSec(tk)}/km
+          </span>
+        ))}
+        <svg className="grafico-svg alto" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+          {ticksTempo.map((tk, i) => (
             <line
               key={i}
               x1={PAD_L}
-              y1={sy(tk)}
+              y1={syTempo(tk)}
               x2={W - PAD_R}
-              y2={sy(tk)}
+              y2={syTempo(tk)}
               stroke="#2C3541"
               strokeWidth={1}
               vectorEffect="non-scaling-stroke"
             />
           ))}
           <polyline
-            points={linha}
+            points={linhaTempo}
             fill="none"
-            stroke={cor}
+            stroke={COR_TEMPO}
             strokeWidth={2}
             strokeLinejoin="round"
             strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
           />
           {pontos.map((p, i) => (
-            <circle key={i} cx={sx(i)} cy={sy(p.valor)} r={3.5} fill={cor} />
+            <circle key={i} cx={sx(i)} cy={syTempo(p.tempo)} r={3.5} fill={COR_TEMPO} />
           ))}
+          {domFtp && (
+            <>
+              <polyline
+                points={linhaFtp}
+                fill="none"
+                stroke={COR_FTP}
+                strokeWidth={2}
+                strokeDasharray="5 4"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+              {comFtp.map((p) => (
+                <circle key={p.i} cx={sx(p.i)} cy={syFtp(p.ftp)} r={3.5} fill={COR_FTP} />
+              ))}
+            </>
+          )}
         </svg>
         {pontos.map((p, i) => (
           <span key={i} className="grafico-tick-x" style={{ left: `${(sx(i) / W) * 100}%` }}>
@@ -178,8 +236,6 @@ export function EvolucaoTestes({ alunoId }: { alunoId: string }) {
   }
 
   if (carregando) return null;
-
-  const comFtp = testes.filter((tt) => tt.ftp_pace_sec != null);
 
   return (
     <div>
@@ -307,20 +363,15 @@ export function EvolucaoTestes({ alunoId }: { alunoId: string }) {
           </div>
 
           <div className="grafico-card" style={{ marginTop: 14 }}>
-            <MiniEvolucao
-              titulo={t("teste3km.chartTime")}
-              pontos={testes.map((tt) => ({ data: tt.data_teste, valor: tt.tempo_sec }))}
-              fmtValor={(v) => fmtSec(v)}
-              cor="#7BD88F"
+            <EvolucaoChart
+              pontos={testes.map((tt) => ({
+                data: tt.data_teste,
+                tempo: tt.tempo_sec,
+                ftp: tt.ftp_pace_sec,
+              }))}
+              tituloTempo={t("teste3km.chartTime")}
+              tituloFtp={t("teste3km.chartFtp")}
             />
-            {comFtp.length > 0 && (
-              <MiniEvolucao
-                titulo={t("teste3km.chartFtp")}
-                pontos={comFtp.map((tt) => ({ data: tt.data_teste, valor: tt.ftp_pace_sec! }))}
-                fmtValor={(v) => `${fmtSec(v)}/km`}
-                cor="#4C8CFF"
-              />
-            )}
           </div>
         </>
       )}
