@@ -12,6 +12,7 @@ import type {
 import { fmtSec } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { EvolucaoTestes } from "@/components/EvolucaoTestes";
+import { EficienciaAerobica } from "@/components/EficienciaAerobica";
 import { SecaoColapsavel } from "@/components/SecaoColapsavel";
 
 type ExecComFb = TreinoExecutado & {
@@ -39,6 +40,39 @@ const COR_ZONA: Record<string, string> = {
   Z4: "var(--z4)",
   Z5: "var(--z5)",
 };
+
+/** cor por faixa de percentual — reaproveitada pela aderência e pelo volume semanal */
+function corPct(pct: number): string {
+  if (pct >= 80) return "var(--z2)";
+  if (pct >= 50) return "var(--z4)";
+  return "var(--z5)";
+}
+
+type VolumeSemana = { semana: number; planejadoM: number; realM: number };
+
+/** soma o volume planejado (por semana) e o realmente executado (soma dos
+ *  `dist_m` das etapas de cada execução casada) — dá a visão de carga de
+ *  treino real × planejada, semana a semana do ciclo. */
+function calcularVolumePorSemana(
+  treinos: TreinoPlanejado[],
+  execPorTreino: Map<string | null, ExecComFb>,
+): VolumeSemana[] {
+  const porSemana = new Map<number, VolumeSemana>();
+  for (const tp of treinos) {
+    const atual = porSemana.get(tp.semana) ?? {
+      semana: tp.semana,
+      planejadoM: 0,
+      realM: 0,
+    };
+    atual.planejadoM += tp.volume_planejado_m ?? 0;
+    const exec = execPorTreino.get(tp.id);
+    if (exec) {
+      atual.realM += (exec.etapas ?? []).reduce((s, e) => s + (e.dist_m ?? 0), 0);
+    }
+    porSemana.set(tp.semana, atual);
+  }
+  return [...porSemana.values()].sort((a, b) => a.semana - b.semana);
+}
 
 export function AlunoDetalhePage() {
   const t = useT();
@@ -111,6 +145,11 @@ export function AlunoDetalhePage() {
   const execPorTreino = new Map(
     execucoes.map((e) => [e.treino_planejado_id, e] as const),
   );
+  const executados = treinos.filter((tp) => execPorTreino.has(tp.id)).length;
+  const pctAderencia = treinos.length
+    ? Math.round((executados / treinos.length) * 100)
+    : 0;
+  const volumePorSemana = calcularVolumePorSemana(treinos, execPorTreino);
 
   return (
     <>
@@ -135,6 +174,7 @@ export function AlunoDetalhePage() {
       </div>
 
       <EvolucaoTestes alunoId={aluno.id} />
+      <EficienciaAerobica execucoes={execucoes} />
 
       {ciclos.length === 0 ? (
         <div className="placeholder-box">
@@ -181,6 +221,45 @@ export function AlunoDetalhePage() {
                 <div className="value num">{ciclo.ftp_data_teste ?? "—"}</div>
               </div>
             </div>
+          )}
+
+          {volumePorSemana.length > 0 && (
+            <SecaoColapsavel
+              chave="aluno.volume"
+              titulo={t("aluno.volumeTitle")}
+              style={{ marginTop: 22 }}
+            >
+              <div className="volume-semanas">
+                {volumePorSemana.map((v) => {
+                  const pct =
+                    v.planejadoM > 0
+                      ? (v.realM / v.planejadoM) * 100
+                      : v.realM > 0
+                        ? 100
+                        : 0;
+                  return (
+                    <div key={v.semana} className="volume-semana-row">
+                      <div className="volume-semana-label">
+                        {t("aluno.weekLabel", { n: v.semana })}
+                      </div>
+                      <div className="volume-semana-track">
+                        <div
+                          className="volume-semana-fill"
+                          style={{
+                            width: `${Math.min(100, pct)}%`,
+                            background: corPct(pct),
+                          }}
+                        />
+                      </div>
+                      <div className="volume-semana-valores num">
+                        {(v.realM / 1000).toFixed(1)} / {(v.planejadoM / 1000).toFixed(1)} km
+                        · {Math.round(pct)}%
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </SecaoColapsavel>
           )}
 
           <SecaoColapsavel
@@ -236,6 +315,17 @@ export function AlunoDetalhePage() {
             chave="aluno.treinos"
             titulo={t("aluno.cycleWorkoutsTitle", { count: treinos.length })}
             style={{ marginTop: 22 }}
+            acoes={
+              treinos.length > 0 && (
+                <span
+                  className="status-pill"
+                  style={{ color: corPct(pctAderencia), borderColor: corPct(pctAderencia) }}
+                  title={t("aluno.adherenceTitle")}
+                >
+                  {executados}/{treinos.length} · {pctAderencia}%
+                </span>
+              )
+            }
           >
           <div className="conf-table-wrap">
             <table className="conf">

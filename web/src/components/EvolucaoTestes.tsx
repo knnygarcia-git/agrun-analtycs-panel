@@ -33,6 +33,41 @@ function formatoMelhora(inicial: number, final: number): { texto: string; classe
   };
 }
 
+function formatoMelhoraPorMes(pct: number): { texto: string; classe: string } {
+  if (Math.abs(pct) < 0.05) return { texto: "0%/mês", classe: "neutro" };
+  return {
+    texto: `${pct > 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(1)}%/mês`,
+    classe: pct > 0 ? "up" : "down",
+  };
+}
+
+/** Inclinação da reta de regressão linear (mínimos quadrados) — variação de
+ *  `valor` por unidade de `dias`. Usa TODOS os pontos, não só o primeiro e o
+ *  último, então um teste isolado fora da curva pesa menos no resultado. */
+function inclinacaoRegressao(pontos: { dias: number; valor: number }[]): number {
+  const n = pontos.length;
+  const somaX = pontos.reduce((s, p) => s + p.dias, 0);
+  const somaY = pontos.reduce((s, p) => s + p.valor, 0);
+  const somaXY = pontos.reduce((s, p) => s + p.dias * p.valor, 0);
+  const somaXX = pontos.reduce((s, p) => s + p.dias * p.dias, 0);
+  const denominador = n * somaXX - somaX * somaX;
+  return denominador === 0 ? 0 : (n * somaXY - somaX * somaY) / denominador;
+}
+
+/** % média de evolução por mês, pela reta de regressão dos tempos ao longo
+ *  das datas — mais robusta que "primeiro → último" quando há vários testes,
+ *  pois não depende só das duas pontas. */
+function mediaPorMes(pontos: { data: string; tempo: number }[]): number {
+  const base = new Date(pontos[0].data).getTime();
+  const comDias = pontos.map((p) => ({
+    dias: (new Date(p.data).getTime() - base) / 86400000,
+    valor: p.tempo,
+  }));
+  const inclinacao = inclinacaoRegressao(comDias); // segundos por dia
+  const mudancaMes = inclinacao * 30; // segundos por mês
+  return (-mudancaMes / pontos[0].tempo) * 100;
+}
+
 /** Gráfico único de evolução: tempo do teste (eixo esquerdo, verde) e FTP pace
  *  resultante (eixo direito, azul, tracejado) no mesmo plot, 1 ponto por
  *  teste, datas no eixo X. Y invertido nos dois — valor menor (mais rápido)
@@ -42,11 +77,13 @@ function EvolucaoChart({
   tituloTempo,
   tituloFtp,
   tituloMelhora,
+  tituloMedia,
 }: {
   pontos: { data: string; tempo: number; ftp: number | null }[];
   tituloTempo: string;
   tituloFtp: string;
   tituloMelhora: string;
+  tituloMedia: string;
 }) {
   const plotW = W - PAD_L - PAD_R;
   const plotH = H - PAD_T - PAD_B;
@@ -108,6 +145,18 @@ function EvolucaoChart({
             </div>
           </div>
         )}
+        {pontos.length >= 3 &&
+          (() => {
+            const m = formatoMelhoraPorMes(mediaPorMes(pontos));
+            return (
+              <div className="stat-line evolucao-media" style={{ marginTop: 10 }}>
+                {tituloMedia}
+                <div>
+                  <span className={`evolucao-pct ${m.classe}`}>{m.texto}</span>
+                </div>
+              </div>
+            );
+          })()}
       </div>
       <div className="grafico-canvas grande">
         {ticksTempo.map((tk, i) => (
@@ -395,6 +444,7 @@ export function EvolucaoTestes({ alunoId }: { alunoId: string }) {
               tituloTempo={t("teste3km.chartTime")}
               tituloFtp={t("teste3km.chartFtp")}
               tituloMelhora={t("teste3km.improvementTitle")}
+              tituloMedia={t("teste3km.avgPerMonth")}
             />
           </div>
         </>
