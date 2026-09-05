@@ -75,10 +75,6 @@ export const en: Record<keyof typeof pt, string> = {
   "aluno.adherenceTitle": "Workouts done / planned in this cycle",
   "aluno.volumeTitle": "Weekly volume - Actual x Planned",
   "aluno.weekLabel": "Wk {n}",
-  "aluno.efficiencyTitle": "Aerobic efficiency (Z2)",
-  "aluno.efficiencyStat": "{count} workouts with a Z2 block · first → most recent",
-  "aluno.efficiencyHint":
-    "Speed ÷ HR in Z2 sections — the higher, the more efficient the athlete got aerobically",
 
   // new athlete
   "novoAluno.title": "New athlete",
@@ -395,6 +391,7 @@ export const en: Record<keyof typeof pt, string> = {
   "teste3km.chartFtp": "Resulting FTP pace",
   "teste3km.improvementTitle": "Improvement from the first recorded test to the most recent",
   "teste3km.avgPerMonth": "Average evolution",
+  "teste3km.vsPrevious": "vs. previous test",
   "teste3km.confirmarApagar": "Delete this 3km test? This cannot be undone.",
   "teste3km.erroCampos": "Fill in the date and the test time.",
   "teste3km.erroFtp": 'Invalid FTP pace. Use M:SS (e.g. "4:15").',

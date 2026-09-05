@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Teste3km } from "@/types/database";
 import { fmtSec, parseTempo } from "@/lib/format";
@@ -78,13 +78,18 @@ function EvolucaoChart({
   tituloFtp,
   tituloMelhora,
   tituloMedia,
+  tituloVsAnterior,
 }: {
   pontos: { data: string; tempo: number; ftp: number | null }[];
   tituloTempo: string;
   tituloFtp: string;
   tituloMelhora: string;
   tituloMedia: string;
+  tituloVsAnterior: string;
 }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [hover, setHover] = useState<number | null>(null);
+
   const plotW = W - PAD_L - PAD_R;
   const plotH = H - PAD_T - PAD_B;
   const comFtp = pontos
@@ -106,6 +111,22 @@ function EvolucaoChart({
 
   const ticksTempo = [domTempo[0], (domTempo[0] + domTempo[1]) / 2, domTempo[1]];
   const ticksFtp = domFtp ? [domFtp[0], (domFtp[0] + domFtp[1]) / 2, domFtp[1]] : [];
+
+  function onMove(e: React.MouseEvent) {
+    const el = wrapRef.current;
+    if (!el || pontos.length === 0) return;
+    if (pontos.length === 1) {
+      setHover(0);
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    const vbX = ((e.clientX - rect.left) / rect.width) * W;
+    const idx = Math.round(((vbX - PAD_L) / plotW) * (pontos.length - 1));
+    setHover(Math.max(0, Math.min(pontos.length - 1, idx)));
+  }
+
+  const hp = hover != null ? pontos[hover] : null;
+  const mVsAnterior = hp && hover! > 0 ? formatoMelhora(pontos[hover! - 1].tempo, hp.tempo) : null;
 
   return (
     <div className="grafico-row">
@@ -158,7 +179,12 @@ function EvolucaoChart({
             );
           })()}
       </div>
-      <div className="grafico-canvas grande">
+      <div
+        className="grafico-canvas grande"
+        ref={wrapRef}
+        onMouseMove={onMove}
+        onMouseLeave={() => setHover(null)}
+      >
         {ticksTempo.map((tk, i) => (
           <span
             key={`t${i}`}
@@ -219,12 +245,68 @@ function EvolucaoChart({
               ))}
             </>
           )}
+          {hp && (
+            <>
+              <line
+                x1={sx(hover!)}
+                y1={PAD_T}
+                x2={sx(hover!)}
+                y2={H - PAD_B}
+                stroke="#EDEFF2"
+                strokeOpacity={0.4}
+                strokeWidth={1}
+                vectorEffect="non-scaling-stroke"
+              />
+              <circle
+                cx={sx(hover!)}
+                cy={syTempo(hp.tempo)}
+                r={4.5}
+                fill="#EDEFF2"
+                stroke={COR_TEMPO}
+                strokeWidth={2}
+              />
+              {hp.ftp != null && domFtp && (
+                <circle
+                  cx={sx(hover!)}
+                  cy={syFtp(hp.ftp)}
+                  r={4.5}
+                  fill="#EDEFF2"
+                  stroke={COR_FTP}
+                  strokeWidth={2}
+                />
+              )}
+            </>
+          )}
         </svg>
         {pontos.map((p, i) => (
           <span key={i} className="grafico-tick-x" style={{ left: `${(sx(i) / W) * 100}%` }}>
             {p.data.slice(5)}
           </span>
         ))}
+        {hp && (
+          <div
+            className="grafico-tooltip"
+            style={{ left: `${Math.min(78, (sx(hover!) / W) * 100)}%` }}
+          >
+            <div className="tt-x">{hp.data}</div>
+            <div>
+              <i className="grafico-dot" style={{ background: COR_TEMPO }} />
+              {fmtSec(hp.tempo)}
+            </div>
+            {hp.ftp != null && (
+              <div>
+                <i className="grafico-dot" style={{ background: COR_FTP }} />
+                {fmtSec(hp.ftp)}/km
+              </div>
+            )}
+            {mVsAnterior && (
+              <div className="tt-plano">
+                <span className={`evolucao-pct ${mVsAnterior.classe}`}>{mVsAnterior.texto}</span>{" "}
+                {tituloVsAnterior}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -445,6 +527,7 @@ export function EvolucaoTestes({ alunoId }: { alunoId: string }) {
               tituloFtp={t("teste3km.chartFtp")}
               tituloMelhora={t("teste3km.improvementTitle")}
               tituloMedia={t("teste3km.avgPerMonth")}
+              tituloVsAnterior={t("teste3km.vsPrevious")}
             />
           </div>
         </>

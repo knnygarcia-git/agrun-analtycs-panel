@@ -76,10 +76,6 @@ export const pt = {
   "aluno.adherenceTitle": "Treinos executados / planejados neste ciclo",
   "aluno.volumeTitle": "Volume semanal - Real x Planejado",
   "aluno.weekLabel": "Sem. {n}",
-  "aluno.efficiencyTitle": "Eficiência aeróbica (Z2)",
-  "aluno.efficiencyStat": "{count} treinos com bloco Z2 · primeiro → mais recente",
-  "aluno.efficiencyHint":
-    "Velocidade ÷ FC nos trechos de Z2 — quanto maior, mais eficiente o aluno ficou no aeróbico",
 
   // novo aluno
   "novoAluno.title": "Novo aluno",
@@ -396,6 +392,7 @@ export const pt = {
   "teste3km.chartFtp": "FTP pace resultante",
   "teste3km.improvementTitle": "Melhora do primeiro teste registrado até o mais recente",
   "teste3km.avgPerMonth": "Média de evolução",
+  "teste3km.vsPrevious": "vs. teste anterior",
   "teste3km.confirmarApagar": "Apagar este teste de 3km? Não dá pra desfazer.",
   "teste3km.erroCampos": "Preencha a data e o tempo do teste.",
   "teste3km.erroFtp": 'FTP pace inválido. Use M:SS (ex: "4:15").',

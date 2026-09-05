@@ -12,7 +12,6 @@ import type {
 import { fmtSec } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { EvolucaoTestes } from "@/components/EvolucaoTestes";
-import { EficienciaAerobica } from "@/components/EficienciaAerobica";
 import { SecaoColapsavel } from "@/components/SecaoColapsavel";
 
 type ExecComFb = TreinoExecutado & {
@@ -174,7 +173,6 @@ export function AlunoDetalhePage() {
       </div>
 
       <EvolucaoTestes alunoId={aluno.id} />
-      <EficienciaAerobica execucoes={execucoes} />
 
       {ciclos.length === 0 ? (
         <div className="placeholder-box">
